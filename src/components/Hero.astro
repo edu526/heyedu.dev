@@ -1,0 +1,226 @@
+---
+// Hero — animated gradient background, typewriter title, CTA buttons
+---
+
+<section id="hero" class="relative min-h-screen flex items-center justify-center overflow-hidden">
+
+  <!-- Animated blobs -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <!-- Grid overlay -->
+    <div class="grid-overlay"></div>
+    <!-- Vignette -->
+    <div class="vignette"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="relative z-10 text-center px-6 max-w-4xl mx-auto pt-24 pb-16">
+
+    <!-- Available badge (comentado — activar cuando esté disponible)
+    <div class="available-badge mb-8">
+      <span class="badge-dot"></span>
+      <span data-i18n="hero.available" class="text-sm font-medium text-emerald-400">Disponible para trabajar</span>
+    </div>
+    -->
+
+    <!-- Name -->
+    <h1 class="font-black tracking-tight mb-2 leading-[1.05]" style="font-size: clamp(2.5rem, 7vw, 5.5rem);">
+      Eduardo<br />
+      <span class="gradient-text">De la Cruz</span>
+    </h1>
+
+    <!-- Animated title -->
+    <div class="h-12 md:h-14 flex items-center justify-center mb-6">
+      <p class="text-slate-300" style="font-size: clamp(1.1rem, 3vw, 1.75rem);">
+        <span id="typewriter" class="font-semibold text-white"></span><!--
+        --><span class="typewriter-cursor" aria-hidden="true">|</span>
+      </p>
+    </div>
+
+    <!-- Subtitle -->
+    <p
+      data-i18n="hero.subtitle"
+      class="text-slate-400 leading-relaxed max-w-2xl mx-auto mb-12"
+      style="font-size: clamp(1rem, 2.5vw, 1.2rem);"
+    >
+      10 años construyendo el puente entre frontend, backend e infraestructura cloud.
+    </p>
+
+    <!-- CTA Buttons -->
+    <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+      <a
+        href="#projects"
+        class="btn-outline inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-slate-200"
+        style="font-size: clamp(0.95rem, 2vw, 1.05rem);"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>
+        </svg>
+        <span data-i18n="hero.ctaProjects">Ver Proyectos</span>
+      </a>
+
+      <a
+        href="https://pe.linkedin.com/in/eduardodelacruzrojas"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-primary inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-white"
+        style="font-size: clamp(0.95rem, 2vw, 1.05rem);"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+        <span data-i18n="hero.ctaLinkedin">LinkedIn</span>
+      </a>
+
+      <a
+        href="https://github.com/edu526"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-outline inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-semibold text-slate-200"
+        style="font-size: clamp(0.95rem, 2vw, 1.05rem);"
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+          <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
+        </svg>
+        <span data-i18n="hero.ctaGithub">GitHub</span>
+      </a>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-indicator mx-auto mt-20" aria-hidden="true"></div>
+  </div>
+</section>
+
+<style>
+  /* ── Blobs ───────────────────────────────── */
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    will-change: transform;
+  }
+  .blob-1 {
+    width: 650px; height: 650px;
+    background: radial-gradient(circle at center, #3b82f6 0%, #1d4ed8 60%, transparent 100%);
+    top: -220px; left: -160px;
+    opacity: 0.14;
+    animation: blobFloat1 28s ease-in-out infinite;
+  }
+  .blob-2 {
+    width: 550px; height: 550px;
+    background: radial-gradient(circle at center, #8b5cf6 0%, #6d28d9 60%, transparent 100%);
+    bottom: -180px; right: -120px;
+    opacity: 0.16;
+    animation: blobFloat2 24s ease-in-out infinite;
+  }
+  .blob-3 {
+    width: 380px; height: 380px;
+    background: radial-gradient(circle at center, #06b6d4 0%, #3b82f6 70%, transparent 100%);
+    top: 45%; left: 55%;
+    opacity: 0.07;
+    animation: blobFloat1 20s ease-in-out infinite reverse;
+  }
+
+  /* ── Grid overlay ────────────────────────── */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  /* ── Vignette ────────────────────────────── */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, #0f0f1a 100%);
+  }
+
+  /* ── Available badge ─────────────────────── */
+  .available-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 14px 6px 10px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.07);
+    border: 1px solid rgba(34, 197, 94, 0.22);
+    animation: availablePulse 3s ease infinite;
+  }
+  .badge-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  }
+
+  /* ── Typewriter cursor ───────────────────── */
+  .typewriter-cursor {
+    display: inline-block;
+    color: #8b5cf6;
+    font-weight: 200;
+    margin-left: 1px;
+    animation: blink 1.1s step-end infinite;
+  }
+
+  /* ── Scroll indicator ────────────────────── */
+  .scroll-indicator {
+    width: 28px;
+    height: 46px;
+    border: 2px solid rgba(148, 163, 184, 0.18);
+    border-radius: 14px;
+    position: relative;
+  }
+  .scroll-indicator::before {
+    content: '';
+    position: absolute;
+    top: 7px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 9px;
+    background: rgba(139, 92, 246, 0.55);
+    border-radius: 2px;
+    animation: scrollDot 2.2s ease-in-out infinite;
+  }
+</style>
+
+<script>
+  const typewriterEl = document.getElementById('typewriter') as HTMLElement | null;
+  let titles: string[] = ['Software Engineer', 'DevOps Engineer', 'Full Stack Developer'];
+  let currentIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  let timeout: ReturnType<typeof setTimeout>;
+
+  function type() {
+    if (!typewriterEl) return;
+    const current = titles[currentIndex];
+    charIndex += isDeleting ? -1 : 1;
+    typewriterEl.textContent = current.substring(0, charIndex);
+
+    let delay = isDeleting ? 42 : 92;
+    if (!isDeleting && charIndex === current.length) {
+      delay = 2400;
+      isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      currentIndex = (currentIndex + 1) % titles.length;
+      delay = 380;
+    }
+    clearTimeout(timeout);
+    timeout = setTimeout(type, delay);
+  }
+
+  type();
+
+  document.addEventListener('langchange', (e: Event) => {
+    const { t } = (e as CustomEvent).detail;
+    titles = t.hero.titles;
+  });
+</script>

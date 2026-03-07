@@ -1,0 +1,116 @@
+---
+// About — bio + skills grid
+import {
+  siPython, siTypescript, siJavascript, siDocker,
+  siAngular, siPostgresql, siTerraform, siLinux,
+  siGithubactions
+} from 'simple-icons';
+
+// Helper to build a simple-icons SVG string
+// colorOverride allows fixing brand colors that are invisible on dark backgrounds
+const si = (icon: { path: string; hex: string }, size = 28, colorOverride?: string) =>
+  `<svg role="img" viewBox="0 0 24 24" width="${size}" height="${size}" fill="#${colorOverride ?? icon.hex}" xmlns="http://www.w3.org/2000/svg"><path d="${icon.path}"/></svg>`;
+
+const skills = [
+  { svg: si(siPython),        name: 'Python' },
+  { svg: si(siTypescript),    name: 'TypeScript' },
+  { svg: si(siJavascript),    name: 'JavaScript' },
+  // AWS — no está en simple-icons por trademark, usamos su logo oficial
+  { svg: `<svg role="img" viewBox="0 0 24 24" width="28" height="28" xmlns="http://www.w3.org/2000/svg" fill="#FF9900"><path d="M6.763 10.036c0 .296.032.535.088.71.064.176.144.368.256.576.04.063.056.127.056.183 0 .08-.048.16-.152.24l-.503.335a.383.383 0 0 1-.208.072c-.08 0-.16-.04-.239-.112a2.47 2.47 0 0 1-.287-.375 6.18 6.18 0 0 1-.248-.471c-.622.734-1.405 1.101-2.347 1.101-.67 0-1.205-.191-1.596-.574-.391-.384-.59-.894-.59-1.533 0-.678.239-1.23.726-1.644.487-.415 1.133-.623 1.955-.623.272 0 .551.024.846.064.296.04.6.104.918.176v-.583c0-.607-.127-1.03-.375-1.277-.255-.248-.686-.367-1.3-.367-.28 0-.568.031-.863.103-.295.072-.583.16-.862.272a2.287 2.287 0 0 1-.28.104.488.488 0 0 1-.127.023c-.112 0-.168-.08-.168-.247v-.391c0-.128.016-.224.056-.28a.597.597 0 0 1 .224-.167c.279-.144.614-.264 1.005-.36a4.84 4.84 0 0 1 1.246-.151c.95 0 1.644.216 2.091.647.439.43.662 1.085.662 1.963v2.586zm-3.24 1.214c.263 0 .534-.048.822-.144.287-.096.543-.271.758-.51.128-.152.224-.32.272-.512.047-.191.08-.423.08-.694v-.335a6.66 6.66 0 0 0-.735-.136 6.02 6.02 0 0 0-.75-.048c-.535 0-.926.104-1.19.32-.263.215-.39.518-.39.917 0 .375.095.655.295.846.191.2.47.296.838.296zm6.41.862c-.144 0-.240-.024-.304-.072-.064-.048-.12-.16-.168-.311L7.586 8.55a1.398 1.398 0 0 1-.072-.32c0-.128.064-.2.191-.2h.783c.151 0 .255.025.31.073.065.048.113.16.16.311l1.342 5.284 1.245-5.284c.04-.16.088-.263.151-.311a.549.549 0 0 1 .31-.073h.639c.16 0 .263.025.32.073.063.048.112.16.151.311l1.261 5.348 1.381-5.348c.048-.16.104-.263.16-.311a.52.52 0 0 1 .311-.073h.743c.127 0 .2.065.2.2 0 .04-.009.08-.017.128a1.137 1.137 0 0 1-.056.2l-1.923 6.179c-.048.16-.104.263-.168.311-.064.048-.16.072-.303.072h-.687c-.151 0-.255-.024-.32-.072-.063-.056-.112-.16-.15-.32l-1.238-5.148-1.23 5.148c-.04.16-.087.264-.15.32-.065.048-.169.072-.32.072h-.686zm10.256.215a5.1 5.1 0 0 1-1.149-.127c-.373-.088-.663-.184-.87-.288-.119-.063-.2-.135-.231-.199a.456.456 0 0 1-.048-.184v-.407c0-.167.064-.247.183-.247.048 0 .096.008.144.024.048.016.12.048.2.08.271.12.566.215.878.279.319.064.63.096.95.096.502 0 .894-.088 1.165-.264a.86.86 0 0 0 .415-.758.778.778 0 0 0-.215-.559c-.144-.151-.416-.287-.807-.415l-1.157-.36c-.583-.183-1.014-.454-1.277-.813a1.902 1.902 0 0 1-.4-1.158c0-.335.071-.63.216-.886.143-.255.335-.479.575-.654.24-.184.51-.32.83-.415.32-.096.655-.136 1.006-.136.175 0 .359.008.535.032.183.024.35.056.518.088.16.04.312.08.455.127.144.048.256.096.336.144.112.064.192.128.24.2.047.063.071.151.071.263v.375c0 .168-.064.256-.184.256-.063 0-.168-.032-.31-.096a3.73 3.73 0 0 0-1.566-.326c-.455 0-.815.071-1.062.223-.248.152-.375.383-.375.71 0 .224.08.416.24.567.159.152.454.304.877.44l1.134.358c.574.184.99.44 1.237.767.247.327.367.702.367 1.117 0 .343-.072.655-.207.926-.144.272-.336.511-.583.703-.248.2-.543.343-.886.447-.36.111-.743.167-1.157.167zM21.698 16.207c-2.626 1.94-6.442 2.972-9.722 2.972-4.598 0-8.74-1.7-11.87-4.526-.247-.223-.024-.527.27-.354 3.384 1.963 7.559 3.153 11.877 3.153 2.914 0 6.114-.607 9.065-1.854.439-.2.815.286.38.609z"/><path d="M22.792 14.961c-.336-.43-2.22-.207-3.074-.103-.255.032-.295-.192-.063-.36 1.502-1.055 3.972-.75 4.258-.399.287.36-.08 2.847-1.482 4.035-.215.184-.423.088-.327-.151.315-.799 1.023-2.577.688-3.022z"/></svg>`,
+    name: 'AWS' },
+  { svg: si(siDocker),         name: 'Docker' },
+  { svg: si(siGithubactions),  name: 'CI/CD' },
+  { svg: si(siAngular, 28, 'DD0031'),   name: 'Angular' },
+  { svg: si(siPostgresql),     name: 'PostgreSQL' },
+  // AI/LLMs — icono de chip/circuito
+  { svg: `<svg role="img" viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="6" width="12" height="12" rx="2" stroke="#a78bfa" stroke-width="1.5"/><path d="M9 6V4m6 2V4M9 20v-2m6 2v-2M6 9H4m2 6H4m16-6h-2m2 6h-2" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/><circle cx="9.5" cy="10.5" r="1" fill="#a78bfa"/><circle cx="14.5" cy="10.5" r="1" fill="#a78bfa"/><path d="M9.5 13.5a2.5 2.5 0 0 0 5 0" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+    name: 'AI / LLMs' },
+  { svg: si(siTerraform),      name: 'Terraform' },
+  { svg: si(siLinux, 28, 'FCC624'),     name: 'Linux' },
+  // REST/APIs
+  { svg: `<svg role="img" viewBox="0 0 24 24" width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="#38bdf8" stroke-width="1.5"/><ellipse cx="12" cy="12" rx="4" ry="9" stroke="#38bdf8" stroke-width="1.5"/><path d="M3 12h18" stroke="#38bdf8" stroke-width="1.5"/><path d="M4.5 7.5h15M4.5 16.5h15" stroke="#38bdf8" stroke-width="1" stroke-dasharray="2 2"/></svg>`,
+    name: 'REST / APIs' },
+];
+---
+
+<section id="about" class="py-28 px-6 relative">
+  <!-- Subtle background accent -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.05),transparent 70%);top:10%;right:-150px;filter:blur(60px);"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto relative z-10">
+
+    <!-- Section header -->
+    <div class="reveal mb-16">
+      <p class="text-violet-400 text-sm font-semibold tracking-widest uppercase mb-3">01 — Who I am</p>
+      <h2 class="section-title">
+        <span data-i18n="about.title">Sobre mí</span>
+      </h2>
+    </div>
+
+    <!-- Bio + Skills grid -->
+    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+
+      <!-- Bio -->
+      <div class="space-y-6">
+        <p data-i18n="about.bio1" class="reveal reveal-delay-1 text-slate-300 leading-relaxed" style="font-size:clamp(0.95rem,2vw,1.05rem);">
+          Con más de 10 años en la industria del software, he recorrido el camino desde el desarrollo frontend hasta la arquitectura cloud. Mi especialidad es construir sistemas robustos y automatizados que escalan.
+        </p>
+        <p data-i18n="about.bio2" class="reveal reveal-delay-2 text-slate-300 leading-relaxed" style="font-size:clamp(0.95rem,2vw,1.05rem);">
+          Trabajo con AWS, pipelines CI/CD, Python y TypeScript — disfruto resolverlo todo, desde la infraestructura hasta la interfaz.
+        </p>
+        <p data-i18n="about.bio3" class="reveal reveal-delay-3 text-slate-400 leading-relaxed italic border-l-2 border-violet-500/40 pl-4" style="font-size:clamp(0.9rem,1.8vw,1rem);">
+          Fuera del código, soy músico — la misma disciplina y creatividad que aplico a la tecnología.
+        </p>
+
+        <!-- Journey timeline (subtle) -->
+        <div class="reveal reveal-delay-4 mt-8 flex flex-wrap gap-3">
+          <div class="timeline-pill">
+            <span class="text-blue-400 font-semibold">Frontend</span>
+          </div>
+          <span class="text-slate-600 self-center">→</span>
+          <div class="timeline-pill">
+            <span class="text-violet-400 font-semibold">Backend</span>
+          </div>
+          <span class="text-slate-600 self-center">→</span>
+          <div class="timeline-pill">
+            <span class="text-emerald-400 font-semibold">DevOps</span>
+          </div>
+          <span class="text-slate-600 self-center">→</span>
+          <div class="timeline-pill">
+            <span class="text-amber-400 font-semibold">Cloud</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="reveal reveal-delay-2">
+        <h3 data-i18n="about.skillsTitle" class="text-slate-400 text-sm font-semibold tracking-widest uppercase mb-6">
+          Stack & Herramientas
+        </h3>
+        <div class="grid grid-cols-3 gap-3">
+          {skills.map((skill, i) => (
+            <div
+              class={`skill-badge rounded-xl p-3 flex flex-col items-center gap-1.5 reveal reveal-delay-${Math.min(i + 1, 6)}`}
+            >
+              <span class="w-8 h-8 flex items-center justify-center skill-icon" set:html={skill.svg} aria-hidden="true"></span>
+              <span class="text-slate-300 text-xs font-medium text-center">{skill.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<style>
+  .timeline-pill {
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.85rem;
+  }
+</style>

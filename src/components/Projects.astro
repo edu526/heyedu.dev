@@ -1,0 +1,128 @@
+---
+// Projects section
+
+const projects = [
+  {
+    key: 'devoCli',
+    name: 'devo-cli',
+    descEs:
+      'CLI de productividad para desarrolladores: commits automáticos con IA, code review, gestión de AWS SSO, DynamoDB y más.',
+    descEn:
+      'Developer productivity CLI: AI-powered commits, code review, AWS SSO management, DynamoDB and more.',
+    tech: ['Python', 'AWS Bedrock', 'CLI', 'boto3'],
+    github: 'https://github.com/edu526/devo-cli',
+    docs: 'https://devo.heyedu.dev',
+    icon: '⚡',
+    gradient: 'from-blue-500/20 to-violet-500/20',
+    accent: 'rgba(59,130,246,0.5)',
+  },
+  {
+    key: 'codeLauncher',
+    name: 'code-launcher',
+    descEs:
+      'Lanzador de proyectos estilo Finder para Linux. Organización por categorías, búsqueda inteligente, múltiples formatos de instalación.',
+    descEn:
+      'Finder-style project launcher for Linux. Category organization, smart search, multiple install formats.',
+    tech: ['Python', 'GTK3', 'Linux', 'AppImage'],
+    github: 'https://github.com/edu526/code-launcher',
+    docs: null,
+    icon: '🚀',
+    gradient: 'from-violet-500/20 to-emerald-500/20',
+    accent: 'rgba(139,92,246,0.5)',
+  },
+];
+---
+
+<section id="projects" class="py-28 px-6 relative">
+  <!-- Background accent -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div style="position:absolute;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(59,130,246,0.05),transparent 70%);bottom:5%;left:-200px;filter:blur(80px);"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto relative z-10">
+
+    <!-- Header -->
+    <div class="reveal mb-16">
+      <p class="text-blue-400 text-sm font-semibold tracking-widest uppercase mb-3">02 — Work</p>
+      <h2 class="section-title">
+        <span data-i18n="projects.title">Proyectos</span>
+      </h2>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+      {projects.map((project, i) => (
+        <article
+          class={`card rounded-2xl p-7 flex flex-col gap-5 reveal reveal-delay-${i + 1}`}
+        >
+          <!-- Card top -->
+          <div class="flex items-start justify-between gap-4">
+            <div class={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-gradient-to-br ${project.gradient} flex-shrink-0`}>
+              {project.icon}
+            </div>
+          </div>
+
+          <!-- Name -->
+          <div>
+            <h3 class="text-lg font-bold text-white font-mono tracking-tight mb-0.5">{project.name}</h3>
+          </div>
+
+          <!-- Description -->
+          <p
+            data-i18n={`projects.items.${project.key}.description`}
+            class="text-slate-400 text-sm leading-relaxed flex-1"
+          >
+            {project.descEs}
+          </p>
+
+          <!-- Tech badges -->
+          <div class="flex flex-wrap gap-2">
+            {project.tech.map((t) => (
+              <span class="tech-badge">{t}</span>
+            ))}
+          </div>
+
+          <!-- Links -->
+          <div class="flex items-center gap-4 flex-wrap">
+            <a
+              href={project.github}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center gap-2 text-sm font-semibold transition-all duration-200 group"
+              style={`color: ${project.accent};`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/>
+              </svg>
+              <span data-i18n="projects.githubLink">Ver en GitHub</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"
+                class="transition-transform group-hover:translate-x-1" aria-hidden="true">
+                <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+              </svg>
+            </a>
+
+            {project.docs && (
+              <a
+                href={project.docs}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-slate-200 transition-colors duration-200 group"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>
+                </svg>
+                <span data-i18n="projects.docsLink">Documentación</span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"
+                  class="transition-transform group-hover:translate-x-1" aria-hidden="true">
+                  <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+                </svg>
+              </a>
+            )}
+          </div>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
