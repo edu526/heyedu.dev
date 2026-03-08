@@ -67,10 +67,13 @@ const {
 
       function updateLangButtons(lang) {
         document.querySelectorAll('.lang-toggle-btn').forEach((btn) => {
-          btn.textContent = lang === 'es' ? 'EN' : 'ES';
+          btn.textContent = t[lang].nav.langToggle;
         });
         document.documentElement.setAttribute('data-lang', lang);
         document.documentElement.setAttribute('lang', lang);
+        document.title = t[lang].meta.title;
+        const metaDesc = document.querySelector('meta[name="description"]');
+        if (metaDesc) metaDesc.setAttribute('content', t[lang].meta.description);
       }
 
       function setLang(lang) {
