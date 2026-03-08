@@ -6,7 +6,7 @@
   <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 
     <!-- Logo -->
-    <a href="#hero" class="font-black text-xl tracking-tight select-none">
+    <a href="#hero" class="font-black text-lg sm:text-xl tracking-tight select-none">
       <span class="text-slate-400 font-light">hey</span><span class="gradient-text">edu</span><span class="text-slate-500 font-light">.dev</span>
     </a>
 
@@ -25,7 +25,7 @@
       <button class="lang-toggle-btn px-3 py-1.5 text-xs font-semibold text-violet-400 border border-violet-500/30 rounded-lg hover:bg-violet-500/10 transition-all duration-200 cursor-pointer">
         EN
       </button>
-      <button id="hamburger" class="p-1 text-slate-400 hover:text-white transition-colors" aria-label="Toggle menu">
+      <button id="hamburger" class="p-2.5 text-slate-400 hover:text-white transition-colors" aria-label="Toggle menu">
         <div class="ham-icon">
           <span></span>
           <span></span>
@@ -93,7 +93,7 @@
     -webkit-backdrop-filter: blur(20px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   }
-  .mobile-menu.open { max-height: 280px; }
+  .mobile-menu.open { max-height: 400px; }
 
   .mobile-nav-link {
     display: block;
@@ -135,5 +135,17 @@
       hamburger?.classList.remove('active');
       mobileMenu.classList.remove('open');
     });
+  });
+
+  // Close mobile menu on outside tap
+  document.addEventListener('click', (e) => {
+    if (
+      mobileMenu?.classList.contains('open') &&
+      !mobileMenu.contains(e.target as Node) &&
+      !hamburger?.contains(e.target as Node)
+    ) {
+      hamburger?.classList.remove('active');
+      mobileMenu.classList.remove('open');
+    }
   });
 </script>

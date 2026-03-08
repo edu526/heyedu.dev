@@ -61,10 +61,12 @@ body {
   -webkit-backdrop-filter: blur(16px);
   transition: border-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 }
-.card:hover {
-  border-color: rgba(139, 92, 246, 0.35);
-  transform: translateY(-5px);
-  box-shadow: 0 24px 64px rgba(139, 92, 246, 0.12);
+@media (hover: hover) {
+  .card:hover {
+    border-color: rgba(139, 92, 246, 0.35);
+    transform: translateY(-5px);
+    box-shadow: 0 24px 64px rgba(139, 92, 246, 0.12);
+  }
 }
 
 /* ─── Buttons ───────────────────────────────────────────── */
@@ -72,10 +74,12 @@ body {
   background: linear-gradient(135deg, #3b82f6, #8b5cf6);
   transition: opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
 }
-.btn-primary:hover {
-  opacity: 0.88;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 36px rgba(139, 92, 246, 0.45);
+@media (hover: hover) {
+  .btn-primary:hover {
+    opacity: 0.88;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 36px rgba(139, 92, 246, 0.45);
+  }
 }
 
 .btn-outline {
@@ -83,10 +87,12 @@ body {
   border: 1px solid rgba(148, 163, 184, 0.25);
   transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
 }
-.btn-outline:hover {
-  border-color: rgba(139, 92, 246, 0.5);
-  background: rgba(139, 92, 246, 0.08);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .btn-outline:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    background: rgba(139, 92, 246, 0.08);
+    transform: translateY(-2px);
+  }
 }
 
 /* ─── Skill badge ───────────────────────────────────────── */
@@ -95,10 +101,12 @@ body {
   border: 1px solid rgba(59, 130, 246, 0.18);
   transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
 }
-.skill-badge:hover {
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.4);
-  transform: translateY(-2px);
+@media (hover: hover) {
+  .skill-badge:hover {
+    background: rgba(59, 130, 246, 0.18);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-2px);
+  }
 }
 
 /* ─── Tech badge ────────────────────────────────────────── */

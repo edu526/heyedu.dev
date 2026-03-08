@@ -33,7 +33,7 @@ const skills = [
 ];
 ---
 
-<section id="about" class="py-28 px-6 relative">
+<section id="about" class="py-12 md:py-20 lg:py-28 px-6 relative">
   <!-- Subtle background accent -->
   <div class="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
     <div style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.05),transparent 70%);top:10%;right:-150px;filter:blur(60px);"></div>
@@ -42,7 +42,7 @@ const skills = [
   <div class="max-w-6xl mx-auto relative z-10">
 
     <!-- Section header -->
-    <div class="reveal mb-16">
+    <div class="reveal mb-8 md:mb-16">
       <p data-i18n="about.sectionLabel" class="text-violet-400 text-sm font-semibold tracking-widest uppercase mb-3">01 — Sobre mí</p>
       <h2 class="section-title">
         <span data-i18n="about.title">Sobre mí</span>
@@ -50,7 +50,7 @@ const skills = [
     </div>
 
     <!-- Bio + Skills grid -->
-    <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+    <div class="grid lg:grid-cols-2 gap-8 lg:gap-20 items-start">
 
       <!-- Bio -->
       <div class="space-y-6">
@@ -65,19 +65,25 @@ const skills = [
         </p>
 
         <!-- Journey timeline (subtle) -->
-        <div class="reveal reveal-delay-4 mt-8 flex flex-wrap gap-3">
-          <div class="timeline-pill">
-            <span class="text-blue-400 font-semibold">Frontend</span>
+        <div class="reveal reveal-delay-4 mt-8 flex flex-wrap gap-3 items-center">
+          <div class="flex items-center gap-3">
+            <div class="timeline-pill">
+              <span class="text-blue-400 font-semibold">Frontend</span>
+            </div>
+            <span class="text-slate-600">→</span>
           </div>
-          <span class="text-slate-600 self-center">→</span>
-          <div class="timeline-pill">
-            <span class="text-violet-400 font-semibold">Backend</span>
+          <div class="flex items-center gap-3">
+            <div class="timeline-pill">
+              <span class="text-violet-400 font-semibold">Backend</span>
+            </div>
+            <span class="text-slate-600">→</span>
           </div>
-          <span class="text-slate-600 self-center">→</span>
-          <div class="timeline-pill">
-            <span class="text-emerald-400 font-semibold">DevOps</span>
+          <div class="flex items-center gap-3">
+            <div class="timeline-pill">
+              <span class="text-emerald-400 font-semibold">DevOps</span>
+            </div>
+            <span class="text-slate-600">→</span>
           </div>
-          <span class="text-slate-600 self-center">→</span>
           <div class="timeline-pill">
             <span class="text-amber-400 font-semibold">Cloud</span>
           </div>
@@ -89,7 +95,7 @@ const skills = [
         <h3 data-i18n="about.skillsTitle" class="text-slate-400 text-sm font-semibold tracking-widest uppercase mb-6">
           Stack & Herramientas
         </h3>
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {skills.map((skill, i) => (
             <div
               class={`skill-badge rounded-xl p-3 flex flex-col items-center gap-1.5 reveal reveal-delay-${Math.min(i + 1, 6)}`}
