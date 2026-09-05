@@ -76,6 +76,7 @@ export const translations: Record<Lang, TranslationSet> = {
       title: 'Proyectos',
       githubLink: 'Ver en GitHub',
       docsLink: 'Documentación',
+      webLink: 'App Web',
       items: {
         devoCli: {
           name: 'devo-cli',
@@ -135,6 +136,7 @@ export const translations: Record<Lang, TranslationSet> = {
       title: 'Projects',
       githubLink: 'View on GitHub',
       docsLink: 'Documentation',
+      webLink: 'Web App',
       items: {
         devoCli: {
           name: 'devo-cli',
