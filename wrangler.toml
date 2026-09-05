@@ -1,0 +1,5 @@
+# Cloudflare Pages config — desactiva la auto-detección de wrangler al ver pnpm-workspace.yaml.
+# Sin este archivo, wrangler intenta adivinar qué workspace deployar y falla.
+name = "heyedu-dev"
+pages_build_output_dir = "./dist"
+compatibility_date = "2025-01-01"
