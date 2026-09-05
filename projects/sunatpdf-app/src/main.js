@@ -143,9 +143,32 @@ els.zoom.addEventListener('input', (e) => setZoom(e.target.value));
 els.zoomIn.addEventListener('click', () => setZoom(state.zoom + 10));
 els.zoomOut.addEventListener('click', () => setZoom(state.zoom - 10));
 
+// ---------- Auto-fit (mobile) ----------
+// ponytail: en móvil el paper de 210mm no cabe en el viewport — calculamos el zoom
+// que lo ajusta al ancho disponible y lo reaplicamos al rotar/redimensionar.
+function applyFitZoom() {
+  if (window.innerWidth >= 900) return;
+  const previewWrap = els.paper.parentElement?.parentElement;
+  if (!previewWrap) return;
+  const padding = 24;
+  const target = previewWrap.clientWidth - padding;
+  if (target <= 0) return;
+  const paperWidthPx = 210 * 96 / 25.4;
+  const scale = (target / paperWidthPx) * 100;
+  state.zoom = Math.round(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, scale)));
+  applyZoom();
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(applyFitZoom, 100);
+});
+
 // ---------- Init ----------
 restore();
 renderPreview(state);
+applyFitZoom();
 
 // ---------- Drag & drop ----------
 els.drop.addEventListener('click', () => els.file.click());

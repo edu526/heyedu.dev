@@ -320,6 +320,12 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   align-items: flex-start;
   overflow: auto;
 }
+.paper-frame {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-shrink: 0;
+}
 
 /* ---------- Paper (A4) ---------- */
 /* IMPORTANTE: este bloque define el contenido del PDF. No modificar sin revisar el render. */
@@ -572,9 +578,38 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 /* ---------- Responsive: móvil vuelve al flujo normal ---------- */
 @media (max-width: 900px) {
   html, body { height: auto; overflow: auto; }
-  .topbar { position: static; }
+  .topbar {
+    position: sticky; top: 0;
+    padding: 0 16px; height: 56px;
+  }
+  .topbar .tag { display: none; }
+  .topbar .badge { font-size: 10px; padding: 4px 8px; }
+  .topbar h1 { font-size: 15px; }
   .layout { position: static; grid-template-columns: 1fr; height: auto; }
   .panel { border-right: 0; border-bottom: 1px solid var(--line); }
-  .panel-scroll { overflow: visible; }
-  .preview-wrap { overflow: visible; }
+  .panel-scroll { overflow: visible; padding: 16px; gap: 12px; }
+
+  /* ponytail: download siempre visible sin scrollear el panel completo */
+  .panel-foot {
+    position: sticky; bottom: 0;
+    z-index: 5;
+    background: rgba(22, 22, 46, 0.92);
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    padding: 12px 16px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .preview-wrap { overflow: hidden; padding: 12px; }
+  /* ponytail: frame con aspect-ratio A4 para que el paper escalado ocupe el alto correcto */
+  .paper-frame {
+    width: 100%;
+    aspect-ratio: 210 / 297;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar .badge { display: none; }
 }
