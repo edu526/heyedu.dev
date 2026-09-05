@@ -84,9 +84,9 @@ export const translations: Record<Lang, TranslationSet> = {
             'CLI de productividad para desarrolladores: commits automáticos con IA, code review, gestión de AWS SSO, DynamoDB y más.',
         },
         codeLauncher: {
-          name: 'code-launcher',
+          name: 'Vori',
           description:
-            'Lanzador de proyectos estilo Finder para Linux. Organización por categorías, búsqueda inteligente, múltiples formatos de instalación.',
+            'Lanzador de proyectos estilo Finder multiplataforma (Linux, macOS, Windows). Navega categorías en columnas, ábrelos directo en tu editor o terminal y gestiona workspaces multi-proyecto desde la bandeja.',
         },
         sunatPdf: {
           name: 'sunatpdf',
@@ -144,9 +144,9 @@ export const translations: Record<Lang, TranslationSet> = {
             'Developer productivity CLI: AI-powered commits, code review, AWS SSO management, DynamoDB and more.',
         },
         codeLauncher: {
-          name: 'code-launcher',
+          name: 'Vori',
           description:
-            'Finder-style project launcher for Linux. Category organization, smart search, multiple install formats.',
+            'Cross-platform Finder-style project launcher (Linux, macOS, Windows). Browse categories in columns, open them in your editor or terminal, and manage multi-project workspaces from the tray.',
         },
         sunatPdf: {
           name: 'sunatpdf',
