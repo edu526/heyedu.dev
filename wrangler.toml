@@ -1,4 +1,6 @@
-# Cloudflare Pages config — wrangler.toml mínimo para que wrangler detecte este repo
-# como Pages (no como Worker) sin hacer auto-detección del workspace.
-# Solo el campo `pages_build_output_dir`; `name` lo pone CF Pages en su dashboard.
-pages_build_output_dir = "./dist"
+name = "heyedu-dev"
+compatibility_date = "2025-09-27"
+compatibility_flags = ["nodejs_compat", "global_fetch_strictly_public"]
+
+[assets]
+directory = "./dist"
