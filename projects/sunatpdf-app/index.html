@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es-PE">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0f0f1a" />
+
+  <title>XML SUNAT a PDF — Convierte boletas y facturas a PDF vectorial</title>
+  <meta name="description" content="Convierte tus XML de comprobantes electrónicos SUNAT (UBL 2.1: boletas, facturas, notas de crédito y débito) a PDF vectorial personalizado. 100% en tu navegador, sin servidor, sin subir archivos." />
+  <meta name="keywords" content="XML SUNAT, SUNAT a PDF, boleta electrónica, factura electrónica, UBL 2.1, convertir XML a PDF, PDF vectorial, comprobante electrónico, nota de crédito, nota de débito, Perú" />
+  <meta name="author" content="Eduardo De la Cruz" />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="canonical" href="https://heyedu.dev/sunatpdf/" />
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+  <link rel="manifest" href="./site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://heyedu.dev/sunatpdf/" />
+  <meta property="og:title" content="XML SUNAT a PDF — Boletas y facturas a PDF vectorial" />
+  <meta property="og:description" content="Convierte tus XML de comprobantes electrónicos SUNAT a PDF personalizado. 100% local en tu navegador, sin servidor, sin subir archivos." />
+  <meta property="og:image" content="https://heyedu.dev/sunatpdf/og-image.png" />
+  <meta property="og:locale" content="es_PE" />
+  <meta property="og:site_name" content="XML SUNAT → PDF" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="XML SUNAT a PDF — Boletas y facturas a PDF vectorial" />
+  <meta name="twitter:description" content="Convierte tus XML de comprobantes electrónicos SUNAT a PDF personalizado. 100% local." />
+
+  <!-- Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "XML SUNAT → PDF",
+    "description": "Convierte tus XML de comprobantes electrónicos SUNAT (UBL 2.1) a PDF vectorial personalizado. 100% en tu navegador.",
+    "url": "https://heyedu.dev/sunatpdf/",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any (Web)",
+    "browserRequirements": "Requiere JavaScript y navegador moderno (Chrome, Edge, Firefox, Safari)",
+    "inLanguage": "es-PE",
+    "isAccessibleForFree": true,
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "featureList": [
+      "Conversión de XML UBL 2.1 de SUNAT a PDF vectorial",
+      "Soporta boletas (03), facturas (01), notas de crédito (07) y notas de débito (08)",
+      "PDF con texto seleccionable, buscable y copiable",
+      "Personalización con logo, color y plantilla",
+      "Procesamiento 100% local — el XML no sale del navegador",
+      "Sin registro, sin servidor, sin límites de uso"
+    ],
+    "creator": {
+      "@type": "Person",
+      "name": "Eduardo De la Cruz",
+      "url": "https://heyedu.dev",
+      "sameAs": ["https://github.com/edu526"]
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand-row">
+      <span class="accent-bar" aria-hidden="true"></span>
+      <div>
+        <h1>XML SUNAT <span class="gradient-text">→ PDF</span></h1>
+        <p class="tag">Sube tu XML, personaliza con tu marca, descarga el PDF.</p>
+      </div>
+    </div>
+    <span class="badge">100% local · sin servidor</span>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <div class="panel-scroll">
+        <section class="card">
+          <h2><span class="num">1</span>XML</h2>
+          <label id="drop" class="drop" tabindex="0">
+            <input id="file" type="file" accept=".xml" hidden />
+            <span class="drop-title">Arrastra tu XML aquí</span>
+            <span class="drop-sub">o haz clic para seleccionar</span>
+          </label>
+          <p id="fileMeta" class="muted small"></p>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">2</span>Tu marca</h2>
+          <label>Nombre comercial
+            <input id="brandName" type="text" placeholder="Mi Empresa S.A.C." />
+          </label>
+          <label>Color principal
+            <input id="brandColor" type="color" value="#8b5cf6" />
+          </label>
+          <label>Logo (PNG/JPG)
+            <input id="brandLogo" type="file" accept="image/*" />
+          </label>
+          <p class="muted small hint">Recomendado: 400×400 px (cuadrado) o 600×200 px (horizontal). PNG con fondo transparente, &lt; 200 KB.</p>
+          <label>Plantilla
+            <select id="template">
+              <option value="classic">Clásica</option>
+              <option value="modern">Moderna</option>
+              <option value="minimal">Minimalista</option>
+            </select>
+          </label>
+          <button id="reset" class="ghost" type="button">Restablecer marca</button>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">3</span>Vista</h2>
+          <div class="zoom-row">
+            <button id="zoomOut" class="ghost zoom-btn" type="button" aria-label="Reducir zoom">−</button>
+            <input id="zoom" type="range" min="40" max="150" value="100" step="5" aria-label="Zoom" />
+            <button id="zoomIn" class="ghost zoom-btn" type="button" aria-label="Aumentar zoom">+</button>
+            <span id="zoomPct" class="muted small">100%</span>
+          </div>
+        </section>
+
+        <details class="faq">
+          <summary class="faq-summary">Preguntas frecuentes</summary>
+          <div class="faq-body">
+            <details class="faq-item">
+              <summary>¿Qué comprobantes puedo convertir?</summary>
+              <p>Boletas de venta (03), facturas (01), notas de crédito (07) y notas de débito (08) emitidos por SUNAT en formato UBL 2.1.</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿Mis archivos están seguros?</summary>
+              <p>100% local — el XML nunca sale de tu navegador. No hay servidor, no se sube nada. Funciona offline después de la primera carga.</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿Necesito registrarme o pagar?</summary>
+              <p>No. Sin cuenta, sin login, sin límites, sin costo.</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿Puedo personalizar el PDF?</summary>
+              <p>Sí: agrega tu logo, nombre comercial, color principal y elige entre 3 plantillas (clásica, moderna, minimalista).</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿El PDF es de buena calidad?</summary>
+              <p>Vectorial, con texto seleccionable y buscable, tipografía Poppins embebida y tamaño exacto A4 (210×297 mm). Ideal para imprimir o archivar.</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿Qué navegador necesito?</summary>
+              <p>Uno moderno: Chrome, Edge, Firefox o Safari de los últimos 2 años. No funciona en Internet Explorer.</p>
+            </details>
+          </div>
+        </details>
+      </div>
+
+      <section class="card panel-foot">
+        <button id="download" class="primary" type="button" disabled>Descargar PDF</button>
+        <p class="muted small byline">Un proyecto de <a href="https://heyedu.dev" rel="author">Eduardo De la Cruz</a></p>
+      </section>
+    </aside>
+
+    <section class="preview-wrap">
+      <div id="paper" class="paper template-classic" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <noscript>
+    <p style="padding:24px;max-width:640px;margin:48px auto;color:#e2e8f0;background:#16162e;border-radius:12px;font-family:system-ui">
+      <strong>XML SUNAT → PDF</strong> necesita JavaScript habilitado para funcionar.
+      Es una herramienta 100% local que convierte tus XML de comprobantes electrónicos SUNAT
+      (boletas, facturas, notas de crédito y débito) a PDF vectorial directamente en tu navegador.
+      <a href="https://heyedu.dev" style="color:#a78bfa">Más proyectos en heyedu.dev</a>.
+    </p>
+  </noscript>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

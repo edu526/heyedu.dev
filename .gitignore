@@ -22,3 +22,11 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# SPA build output (regenerado por `pnpm build`)
+public/sunatpdf/
+
+# SPA node_modules / dist locales (gestionados por pnpm workspaces)
+projects/sunatpdf-app/node_modules/
+projects/sunatpdf-app/dist/
+

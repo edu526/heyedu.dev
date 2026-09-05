@@ -1,0 +1,12 @@
+# Cloudflare Pages headers — se lee desde /public/_headers y se aplica por path.
+# Documentación: https://developers.cloudflare.com/pages/configuration/headers/
+
+# SPA: XML SUNAT → PDF necesita cross-origin isolation para SharedArrayBuffer (WASM)
+/sunatpdf/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+  X-Content-Type-Options: nosniff
+
+# Cache del bundle hashed de la SPA — inmutable por el hash en el filename
+/sunatpdf/assets/*
+  Cache-Control: public, max-age=31536000, immutable

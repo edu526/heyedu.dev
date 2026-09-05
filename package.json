@@ -4,9 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "dev:sunatpdf": "pnpm --filter sunatpdf-app dev",
+    "build": "pnpm --filter sunatpdf-app build && rm -rf public/sunatpdf && cp -r projects/sunatpdf-app/dist public/sunatpdf && astro build",
+    "build:astro": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "pnpm --filter sunatpdf-app test",
+    "assets": "pnpm --filter sunatpdf-app assets"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.2.8",

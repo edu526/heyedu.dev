@@ -31,6 +31,7 @@ export interface TranslationSet {
     items: {
       devoCli: { name: string; description: string };
       codeLauncher: { name: string; description: string };
+      sunatPdf: { name: string; description: string };
     };
   };
   contact: {
@@ -86,6 +87,11 @@ export const translations: Record<Lang, TranslationSet> = {
           description:
             'Lanzador de proyectos estilo Finder para Linux. Organización por categorías, búsqueda inteligente, múltiples formatos de instalación.',
         },
+        sunatPdf: {
+          name: 'sunatpdf',
+          description:
+            'Convierte XML de comprobantes electrónicos SUNAT (boletas, facturas, notas) a PDF vectorial personalizado. 100% en tu navegador, sin servidor.',
+        },
       },
     },
     contact: {
@@ -139,6 +145,11 @@ export const translations: Record<Lang, TranslationSet> = {
           name: 'code-launcher',
           description:
             'Finder-style project launcher for Linux. Category organization, smart search, multiple install formats.',
+        },
+        sunatPdf: {
+          name: 'sunatpdf',
+          description:
+            'Converts SUNAT electronic receipt XML (boletas, facturas, notes) to customized vector PDF. 100% in your browser, no server.',
         },
       },
     },
