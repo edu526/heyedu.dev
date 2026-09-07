@@ -65,18 +65,19 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand-row">
+    <a href="https://heyedu.dev" class="heyedu-brand" rel="author" aria-label="heyedu.dev — Inicio">
       <span class="accent-bar" aria-hidden="true"></span>
-      <div>
-        <h1>XML SUNAT <span class="gradient-text">→ PDF</span></h1>
-        <p class="tag">Sube tu XML, personaliza con tu marca, descarga el PDF.</p>
-      </div>
+      <span class="brand-text"><span class="hey">hey</span><span class="edu">edu</span><span class="dev">.dev</span></span>
+    </a>
+    <div class="app-title">
+      <h1>XML SUNAT <span class="gradient-text">→ PDF</span></h1>
+      <p class="tag">Sube tu XML, personaliza con tu marca, descarga el PDF.</p>
     </div>
     <span class="badge">100% local · sin servidor</span>
   </header>
 
-  <main class="layout">
-    <aside class="panel">
+  <main class="layout" data-active-tab="personalize">
+    <aside class="panel" data-tab-panel="personalize">
       <div class="panel-scroll">
         <section class="card">
           <h2><span class="num">1</span>XML</h2>
@@ -110,16 +111,6 @@
           <button id="reset" class="ghost" type="button">Restablecer marca</button>
         </section>
 
-        <section class="card">
-          <h2><span class="num">3</span>Vista</h2>
-          <div class="zoom-row">
-            <button id="zoomOut" class="ghost zoom-btn" type="button" aria-label="Reducir zoom">−</button>
-            <input id="zoom" type="range" min="40" max="150" value="100" step="5" aria-label="Zoom" />
-            <button id="zoomIn" class="ghost zoom-btn" type="button" aria-label="Aumentar zoom">+</button>
-            <span id="zoomPct" class="muted small">100%</span>
-          </div>
-        </section>
-
         <details class="faq">
           <summary class="faq-summary">Preguntas frecuentes</summary>
           <div class="faq-body">
@@ -149,20 +140,41 @@
             </details>
           </div>
         </details>
+
+        <p class="muted small byline">Un proyecto de <a href="https://heyedu.dev" rel="author">heyedu.dev</a></p>
       </div>
 
       <section class="card panel-foot">
         <button id="download" class="primary" type="button" disabled>Descargar PDF</button>
-        <p class="muted small byline">Un proyecto de <a href="https://heyedu.dev" rel="author">Eduardo De la Cruz</a></p>
       </section>
     </aside>
 
-    <section class="preview-wrap">
+    <section class="preview-wrap" data-tab-panel="preview">
       <div class="paper-frame">
         <div id="paper" class="paper template-classic" aria-live="polite"></div>
       </div>
     </section>
   </main>
+
+  <!-- ponytail: download persistent en mobile — siempre visible encima del tab bar, sin importar el tab activo -->
+  <div class="mobile-cta">
+    <button id="download-mobile" class="primary" type="button" disabled>Descargar PDF</button>
+  </div>
+
+  <nav class="tab-bar" role="tablist">
+    <button class="tab is-active" type="button" data-tab="personalize" role="tab" aria-selected="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/>
+      </svg>
+      <span>Personalizar</span>
+    </button>
+    <button class="tab" type="button" data-tab="preview" role="tab" aria-selected="false">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>
+      </svg>
+      <span>Vista previa</span>
+    </button>
+  </nav>
 
   <noscript>
     <p style="padding:24px;max-width:640px;margin:48px auto;color:#e2e8f0;background:#16162e;border-radius:12px;font-family:system-ui">

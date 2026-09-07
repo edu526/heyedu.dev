@@ -5,8 +5,11 @@
  * Estado global de la app vive en `state`; las funciones puras (parsear, renderizar, generar PDF) viven en sus módulos.
  *
  * Persistencia (localStorage):
- * - `sunat.brand.v1` — { name, color, logo, template, zoom }
+ * - `sunat.brand.v1` — { name, color, logo, template }
  * - `sunat.lastFile.v1` — { name, size, text } del último XML cargado
+ *
+ * Zoom: nativo del navegador (Ctrl+/- / pinch). El preview se auto-ajusta al ancho en móvil
+ * vía `transform: scale()` para que entre en pantalla, pero no hay controles ni estado persistido.
  */
 import '@fontsource-variable/inter';
 import '@fontsource/poppins/400.css';
@@ -24,9 +27,6 @@ const $ = (id) => document.getElementById(id);
 const KEYS = { brand: 'sunat.brand.v1', file: 'sunat.lastFile.v1' };
 const DEFAULT_BRAND = { name: '', color: '#8b5cf6', logo: '' };
 const DEFAULT_TEMPLATE = 'classic';
-const DEFAULT_ZOOM = 100;
-const ZOOM_MIN = 40;
-const ZOOM_MAX = 150;
 
 const safeGet  = (k)     => { try { return localStorage.getItem(k); } catch { return null; } };
 const safeSet  = (k, v)  => { try { localStorage.setItem(k, v); } catch {} };
@@ -37,7 +37,6 @@ const state = {
   data: null,
   brand: { ...DEFAULT_BRAND },
   template: DEFAULT_TEMPLATE,
-  zoom: DEFAULT_ZOOM,
   lastFile: null,
 };
 
@@ -52,10 +51,7 @@ const els = {
   reset: $('reset'),
   paper: $('paper'),
   download: $('download'),
-  zoom: $('zoom'),
-  zoomIn: $('zoomIn'),
-  zoomOut: $('zoomOut'),
-  zoomPct: $('zoomPct'),
+  downloadMobile: $('download-mobile'),
 };
 
 // ---------- Persistence helpers ----------
@@ -63,7 +59,6 @@ function saveState() {
   safeSet(KEYS.brand, JSON.stringify({
     ...state.brand,
     template: state.template,
-    zoom: state.zoom,
   }));
   if (state.lastFile) {
     safeSet(KEYS.file, JSON.stringify(state.lastFile));
@@ -75,12 +70,10 @@ function restore() {
   if (b) {
     state.brand = { ...DEFAULT_BRAND, ...b };
     state.template = b.template || DEFAULT_TEMPLATE;
-    state.zoom = clampZoom(b.zoom ?? DEFAULT_ZOOM);
     els.brandName.value = state.brand.name || '';
     els.brandColor.value = state.brand.color;
     els.template.value = state.template;
   }
-  applyZoom();
 
   const f = safeJSON(KEYS.file);
   if (f?.text) {
@@ -89,6 +82,7 @@ function restore() {
       state.lastFile = f;
       els.fileMeta.textContent = `${f.name} · ${(f.size / 1024).toFixed(1)} KB`;
       els.download.disabled = false;
+      els.downloadMobile.disabled = false;
     } catch {
       localStorage.removeItem(KEYS.file);
     }
@@ -113,6 +107,7 @@ function loadFile(file) {
       state.lastFile = { name: file.name, size: file.size, text };
       els.fileMeta.textContent = `${file.name} · ${(file.size / 1024).toFixed(1)} KB`;
       els.download.disabled = false;
+      els.downloadMobile.disabled = false;
       saveState();
       renderPreview(state);
     } catch (e) {
@@ -122,31 +117,12 @@ function loadFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-// ---------- Zoom ----------
-function clampZoom(z) { return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Number(z) || DEFAULT_ZOOM)); }
-
-function applyZoom() {
-  els.paper.style.setProperty('--zoom', state.zoom / 100);
-  els.zoom.value = String(state.zoom);
-  els.zoomPct.textContent = `${state.zoom}%`;
-}
-
-function setZoom(z) {
-  state.zoom = clampZoom(z);
-  applyZoom();
-  saveState();
-}
-
 const onBrandChange = (mut) => { mut(); saveState(); renderPreview(state); };
 
-els.zoom.addEventListener('input', (e) => setZoom(e.target.value));
-els.zoomIn.addEventListener('click', () => setZoom(state.zoom + 10));
-els.zoomOut.addEventListener('click', () => setZoom(state.zoom - 10));
-
-// ---------- Auto-fit (mobile) ----------
-// ponytail: en móvil el paper de 210mm no cabe en el viewport — calculamos el zoom
-// que lo ajusta al ancho disponible y lo reaplicamos al rotar/redimensionar.
-function applyFitZoom() {
+// ---------- Auto-fit (mobile only) ----------
+// ponytail: en móvil el paper de 210mm no cabe en el viewport — escalamos al ancho disponible.
+// No es un control, sólo sizing inicial: el usuario usa Ctrl+/- / pinch del navegador para ajustar.
+function fitPaperToFrame() {
   if (window.innerWidth >= 900) return;
   const previewWrap = els.paper.parentElement?.parentElement;
   if (!previewWrap) return;
@@ -154,21 +130,98 @@ function applyFitZoom() {
   const target = previewWrap.clientWidth - padding;
   if (target <= 0) return;
   const paperWidthPx = 210 * 96 / 25.4;
-  const scale = (target / paperWidthPx) * 100;
-  state.zoom = Math.round(Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, scale)));
-  applyZoom();
+  const scale = Math.max(0.4, Math.min(1.5, target / paperWidthPx));
+  els.paper.style.setProperty('--zoom', String(scale));
 }
 
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(applyFitZoom, 100);
+  resizeTimer = setTimeout(fitPaperToFrame, 100);
+});
+
+// ---------- Native zoom (scoped al preview) ----------
+// ponytail: interceptamos Ctrl+scroll, Ctrl+=/-, y pinch mobile para que escalen SÓLO el paper via --zoom.
+// El zoom nativo del navegador escala toda la UI; aquí el topbar/sidebar/tab-bar quedan intactos.
+function applyZoomDelta(factor) {
+  const current = parseFloat(getComputedStyle(els.paper).getPropertyValue('--zoom')) || 1;
+  const next = Math.max(0.4, Math.min(1.5, current * factor));
+  els.paper.style.setProperty('--zoom', String(next));
+}
+
+const previewWrapEl = els.paper.parentElement?.parentElement;
+if (previewWrapEl) {
+  // Ctrl+scroll y trackpad pinch (desktop): escalan el paper
+  previewWrapEl.addEventListener('wheel', (e) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault();
+    applyZoomDelta(e.deltaY > 0 ? 0.92 : 1.08);
+  }, { passive: false });
+
+  // Pinch mobile: dos dedos sobre el preview escalan el paper
+  let pinchStartDist = 0;
+  previewWrapEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      pinchStartDist = Math.hypot(
+        e.touches[0].pageX - e.touches[1].pageX,
+        e.touches[0].pageY - e.touches[1].pageY
+      );
+    }
+  }, { passive: true });
+
+  previewWrapEl.addEventListener('touchmove', (e) => {
+    if (e.touches.length !== 2 || pinchStartDist === 0) return;
+    const dist = Math.hypot(
+      e.touches[0].pageX - e.touches[1].pageX,
+      e.touches[0].pageY - e.touches[1].pageY
+    );
+    const ratio = dist / pinchStartDist;
+    // ponytail: preventDefault sólo cuando hay pinch real (>=2% cambio), para no bloquear scroll/pán
+    if (Math.abs(ratio - 1) > 0.02) e.preventDefault();
+    applyZoomDelta(ratio);
+    pinchStartDist = dist;
+  }, { passive: false });
+
+  previewWrapEl.addEventListener('touchend', () => {
+    pinchStartDist = 0;
+  });
+}
+
+// Ctrl + ( +/- / 0 ): atajo de teclado global, salvo cuando se escribe en un input
+window.addEventListener('keydown', (e) => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === '+' || e.key === '=') { e.preventDefault(); applyZoomDelta(1.1); }
+  else if (e.key === '-' || e.key === '_') { e.preventDefault(); applyZoomDelta(0.9); }
+  else if (e.key === '0') { e.preventDefault(); els.paper.style.setProperty('--zoom', '1'); }
+});
+
+// ---------- Tabs (mobile) ----------
+const layoutEl = document.querySelector('.layout');
+function setActiveTab(target) {
+  layoutEl.dataset.activeTab = target;
+  document.querySelectorAll('.tab').forEach(t => {
+    const active = t.dataset.tab === target;
+    t.classList.toggle('is-active', active);
+    t.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  // ponytail: re-fit al entrar al preview porque el panel acaba de aparecer y su ancho puede haber cambiado
+  if (target === 'preview') fitPaperToFrame();
+}
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => setActiveTab(tab.dataset.tab));
 });
 
 // ---------- Init ----------
 restore();
 renderPreview(state);
-applyFitZoom();
+fitPaperToFrame();
+
+// ponytail: si hay un XML restaurado en móvil, salta directo al preview para que el usuario vea su PDF sin tocar nada
+if (state.data && window.innerWidth < 900) {
+  setActiveTab('preview');
+}
 
 // ---------- Drag & drop ----------
 els.drop.addEventListener('click', () => els.file.click());
@@ -206,12 +259,13 @@ els.reset.addEventListener('click', () => {
 });
 
 // ---------- Download PDF ----------
-els.download.addEventListener('click', async () => {
+async function handleDownload() {
   if (!state.data) return;
   els.download.disabled = true;
-  const oldText = els.download.textContent;
+  els.downloadMobile.disabled = true;
   els.download.textContent = 'Generando…';
-  // ponytail: resetear zoom para que el PDF salga a tamaño real (210mm × 297mm)
+  els.downloadMobile.textContent = 'Generando…';
+  // ponytail: resetear escala para que el PDF salga a tamaño A4 real (210mm × 297mm)
   const prevZoom = els.paper.style.getPropertyValue('--zoom');
   els.paper.style.setProperty('--zoom', '1');
   try {
@@ -222,8 +276,12 @@ els.download.addEventListener('click', async () => {
     alert('Error generando PDF: ' + e.message);
     console.error(e);
   } finally {
-    els.paper.style.setProperty('--zoom', prevZoom || String(state.zoom / 100));
+    els.paper.style.setProperty('--zoom', prevZoom);
     els.download.disabled = false;
-    els.download.textContent = oldText;
+    els.downloadMobile.disabled = false;
+    els.download.textContent = 'Descargar PDF';
+    els.downloadMobile.textContent = 'Descargar PDF';
   }
-});
+}
+els.download.addEventListener('click', handleDownload);
+els.downloadMobile.addEventListener('click', handleDownload);
