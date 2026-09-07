@@ -140,54 +140,53 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(fitPaperToFrame, 100);
 });
 
-// ---------- Native zoom (scoped al preview) ----------
-// ponytail: interceptamos Ctrl+scroll, Ctrl+=/-, y pinch mobile para que escalen SÓLO el paper via --zoom.
-// El zoom nativo del navegador escala toda la UI; aquí el topbar/sidebar/tab-bar quedan intactos.
+// ---------- Native zoom (scoped al paper) ----------
+// ponytail: el viewport meta bloquea el pinch/zoom nativo del navegador (user-scalable=no, maximum-scale=1).
+// Nuestro handler es la única fuente de zoom — Ctrl+scroll, pinch, Ctrl +/- — aplicado via --zoom al paper.
+// El topbar, sidebar, tab-bar y CTA quedan intactos al hacer zoom.
 function applyZoomDelta(factor) {
   const current = parseFloat(getComputedStyle(els.paper).getPropertyValue('--zoom')) || 1;
   const next = Math.max(0.4, Math.min(1.5, current * factor));
   els.paper.style.setProperty('--zoom', String(next));
 }
 
-const previewWrapEl = els.paper.parentElement?.parentElement;
-if (previewWrapEl) {
-  // Ctrl+scroll y trackpad pinch (desktop): escalan el paper
-  previewWrapEl.addEventListener('wheel', (e) => {
-    if (!(e.ctrlKey || e.metaKey)) return;
-    e.preventDefault();
-    applyZoomDelta(e.deltaY > 0 ? 0.92 : 1.08);
-  }, { passive: false });
+// Ctrl + scroll / trackpad pinch (desktop): zoom del paper
+document.addEventListener('wheel', (e) => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  e.preventDefault();
+  applyZoomDelta(e.deltaY > 0 ? 0.92 : 1.08);
+}, { passive: false });
 
-  // Pinch mobile: dos dedos sobre el preview escalan el paper
-  let pinchStartDist = 0;
-  previewWrapEl.addEventListener('touchstart', (e) => {
-    if (e.touches.length === 2) {
-      pinchStartDist = Math.hypot(
-        e.touches[0].pageX - e.touches[1].pageX,
-        e.touches[0].pageY - e.touches[1].pageY
-      );
-    }
-  }, { passive: true });
-
-  previewWrapEl.addEventListener('touchmove', (e) => {
-    if (e.touches.length !== 2 || pinchStartDist === 0) return;
-    const dist = Math.hypot(
+// Pinch (mobile): dos dedos en cualquier parte escalan el paper
+let pinchStartDist = 0;
+document.addEventListener('touchstart', (e) => {
+  if (e.touches.length === 2) {
+    pinchStartDist = Math.hypot(
       e.touches[0].pageX - e.touches[1].pageX,
       e.touches[0].pageY - e.touches[1].pageY
     );
-    const ratio = dist / pinchStartDist;
-    // ponytail: preventDefault sólo cuando hay pinch real (>=2% cambio), para no bloquear scroll/pán
-    if (Math.abs(ratio - 1) > 0.02) e.preventDefault();
-    applyZoomDelta(ratio);
-    pinchStartDist = dist;
-  }, { passive: false });
+  }
+}, { passive: true });
 
-  previewWrapEl.addEventListener('touchend', () => {
-    pinchStartDist = 0;
-  });
-}
+document.addEventListener('touchmove', (e) => {
+  if (e.touches.length !== 2 || pinchStartDist === 0) return;
+  const dist = Math.hypot(
+    e.touches[0].pageX - e.touches[1].pageX,
+    e.touches[0].pageY - e.touches[1].pageY
+  );
+  const ratio = dist / pinchStartDist;
+  if (Math.abs(ratio - 1) > 0.02) e.preventDefault();
+  applyZoomDelta(ratio);
+  pinchStartDist = dist;
+}, { passive: false });
 
-// Ctrl + ( +/- / 0 ): atajo de teclado global, salvo cuando se escribe en un input
+document.addEventListener('touchend', () => {
+  pinchStartDist = 0;
+});
+
+// Ctrl + ( +/- / 0 ): atajo de teclado, salvo cuando se escribe en un input
 window.addEventListener('keydown', (e) => {
   if (!(e.ctrlKey || e.metaKey)) return;
   const tag = document.activeElement?.tagName;
