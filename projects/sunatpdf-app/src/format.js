@@ -4,6 +4,7 @@
  * Módulo puro: sin imports del DOM, sin estado, sin side effects. Usado por
  * parser.js y ui.js.
  */
+import QRCode from 'qrcode';
 
 /** Meses del año en español (formato SUNAT: "setiembre" en lugar de "septiembre"). */
 export const MESES = [
@@ -131,6 +132,54 @@ export const hexToRgbStr = (hex) => {
   const v = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
   return `${parseInt(v.slice(0, 2), 16)}, ${parseInt(v.slice(2, 4), 16)}, ${parseInt(v.slice(4, 6), 16)}`;
 };
+
+/**
+ * Arma el string del código QR SUNAT: 10 campos separados por "|" + un "|" final.
+ * Formato oficial (RS 309-2018/SUNAT): RUC emisor, tipo de comprobante (catálogo 01),
+ * serie, correlativo, IGV, importe total, fecha de emisión, tipo doc. del adquirente
+ * (catálogo 06), número de doc. del adquirente, hash (ds:DigestValue de la firma XML).
+ * @param {object} data - Comprobante normalizado (retorno de `parseUblXml`).
+ * @returns {string}
+ */
+export function buildQrPayload(data) {
+  const [serie, numero] = String(data.serieNumero || '').split('-');
+  const correlativo = (numero || '').padStart(8, '0');
+  return [
+    data.emisor?.doc || '',
+    data.tipoCode || '',
+    serie || '',
+    correlativo,
+    (data.totals?.igv || 0).toFixed(2),
+    (data.total || 0).toFixed(2),
+    data.fecha || '',
+    data.cliente?.docTipoCode || '',
+    data.cliente?.doc || '',
+    data.hash || '',
+    '',
+  ].join('|');
+}
+
+/**
+ * Renderiza un texto como código QR vectorial (SVG inline), para que quede como
+ * texto/paths reales en el PDF en vez de una imagen raster.
+ * @param {string} text
+ * @param {{size?: number}} [opts]
+ * @returns {string} Markup `<svg>...</svg>`.
+ */
+export function qrSvg(text, { size = 100 } = {}) {
+  const { modules } = QRCode.create(text, { errorCorrectionLevel: 'M' });
+  const n = modules.size;
+  const cell = size / n;
+  let rects = '';
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      if (modules.get(row, col)) {
+        rects += `<rect x="${(col * cell).toFixed(2)}" y="${(row * cell).toFixed(2)}" width="${cell.toFixed(2)}" height="${cell.toFixed(2)}"/>`;
+      }
+    }
+  }
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges"><rect width="${size}" height="${size}" fill="#fff"/><g fill="#1a1a1a">${rects}</g></svg>`;
+}
 
 /**
  * Convierte un número a su representación textual en soles/dólares.

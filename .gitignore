@@ -30,3 +30,4 @@ public/sunatpdf/
 projects/sunatpdf-app/node_modules/
 projects/sunatpdf-app/dist/
 
+.playwright-mcp

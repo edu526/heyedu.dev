@@ -98,17 +98,51 @@
             <input id="brandColor" type="color" value="#8b5cf6" />
           </label>
           <label>Logo (PNG/JPG)
-            <input id="brandLogo" type="file" accept="image/*" />
+            <button type="button" class="upload-btn" id="uploadLogo">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+              <span class="upload-label">Subir logo</span>
+            </button>
+            <input id="brandLogo" type="file" accept="image/*" hidden />
           </label>
           <p class="muted small hint">Recomendado: 400×400 px (cuadrado) o 600×200 px (horizontal). PNG con fondo transparente, &lt; 200 KB.</p>
           <label>Plantilla
             <select id="template">
-              <option value="classic">Clásica</option>
-              <option value="modern">Moderna</option>
-              <option value="minimal">Minimalista</option>
+              <option value="ledger">Ledger Refinado</option>
+              <option value="grid">Grid Moderno</option>
+              <option value="denso">Denso Operativo</option>
             </select>
           </label>
           <button id="reset" class="ghost" type="button">Restablecer marca</button>
+        </section>
+
+        <section class="card">
+          <h2><span class="num">3</span>Pagos y contacto</h2>
+          <label>Billetera 1
+            <div class="wallet-slot">
+              <input id="contactWallet1Label" type="text" placeholder="Yape" maxlength="16" />
+              <input id="contactWallet1Number" type="tel" placeholder="987 654 321" />
+            </div>
+          </label>
+          <label>Billetera 2
+            <div class="wallet-slot">
+              <input id="contactWallet2Label" type="text" placeholder="Plin" maxlength="16" />
+              <input id="contactWallet2Number" type="tel" placeholder="987 654 321" />
+            </div>
+          </label>
+          <label>WhatsApp
+            <input id="contactWhatsapp" type="tel" placeholder="987 654 321" />
+          </label>
+          <label>Instagram
+            <input id="contactInstagram" type="text" placeholder="@miempresa" />
+          </label>
+          <label>Facebook
+            <input id="contactFacebook" type="text" placeholder="Mi Empresa" />
+          </label>
+          <label>Cuentas bancarias
+            <textarea id="contactBanks" rows="3" maxlength="220" placeholder="BCP Soles: 123-4567890-0-12&#10;BCP Dólares: 123-4567890-1-13&#10;CCI: 00212345678901234567"></textarea>
+          </label>
         </section>
 
         <details class="faq">
@@ -128,15 +162,19 @@
             </details>
             <details class="faq-item">
               <summary>¿Puedo personalizar el PDF?</summary>
-              <p>Sí: agrega tu logo, nombre comercial, color principal y elige entre 3 plantillas (clásica, moderna, minimalista).</p>
+              <p>Sí: agrega tu logo, nombre comercial, color principal y elige entre 3 plantillas (Ledger Refinado, Grid Moderno, Denso Operativo).</p>
             </details>
             <details class="faq-item">
               <summary>¿El PDF es de buena calidad?</summary>
-              <p>Vectorial, con texto seleccionable y buscable, tipografía Poppins embebida y tamaño exacto A4 (210×297 mm). Ideal para imprimir o archivar.</p>
+              <p>Vectorial, con texto seleccionable y buscable, tipografía Inter embebida y tamaño exacto A4 (210×297 mm). Ideal para imprimir o archivar.</p>
             </details>
             <details class="faq-item">
               <summary>¿Qué navegador necesito?</summary>
               <p>Uno moderno: Chrome, Edge, Firefox o Safari de los últimos 2 años. No funciona en Internet Explorer.</p>
+            </details>
+            <details class="faq-item">
+              <summary>¿Cómo encuentro mi CCI o número de cuenta?</summary>
+              <p>Abre tu banca móvil o web, entra a "Mis cuentas" o "Cuentas y ahorros". Verás el número de cuenta (BCP: 14 dígitos) y el CCI (20 dígitos, empieza con 0 para soles o 1 para dólares). Cópialos y pégalos en "Cuentas bancarias", uno por línea.</p>
             </details>
           </div>
         </details>
@@ -150,8 +188,15 @@
     </aside>
 
     <section class="preview-wrap" data-tab-panel="preview">
-      <div class="paper-frame">
-        <div id="paper" class="paper template-classic" aria-live="polite"></div>
+      <!-- ponytail: #paper ya no se muestra — vive fuera de pantalla como única fuente para
+           `buildPdf()` (ver main.js). Lo que el usuario ve es siempre el PDF real (#pdfPreview,
+           `pdf.preview()`), regenerado con debounce, para no mantener dos vistas separadas. -->
+      <div class="paper-frame render-source">
+        <div id="paper" aria-live="polite"></div>
+      </div>
+      <div class="pdf-real-frame">
+        <div id="pdfPreview" aria-live="polite"></div>
+        <p id="pdfPreviewHint" class="muted small pdf-real-hint">Sube un XML para ver el PDF.</p>
       </div>
     </section>
   </main>

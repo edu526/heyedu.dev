@@ -1,10 +1,34 @@
 /* sunat-xml-pdf/styles */
 
+/* ---------- Paged Media: configuración global de página ---------- */
+/* El margen de cada hoja física vive ACÁ, no en el padding de `.paper` — un padding en el
+   elemento sólo se aplica al inicio/fin del box fragmentado (primera y última hoja), no a
+   cada hoja intermedia (ver docs/ARCHITECTURE.md §7). `@page` sí margina cada hoja por igual,
+   y de paso habilita la numeración nativa "Página N de M" vía un margin-box con
+   counter(page)/counter(pages) — el único lugar donde el total de hojas se puede inyectar
+   sin medir de antemano, porque lo calcula el propio motor de paginación al renderizar. */
+@page {
+  size: A4;
+  margin: 14mm 14mm 16mm 14mm;
+
+  @bottom-center {
+    content: "Página " counter(page) " de " counter(pages);
+    font-family: "Inter", sans-serif;
+    font-size: 8pt;
+    color: #9ca3af;
+  }
+}
+
 :root {
   --brand: #8b5cf6;
   --brand-2: #a78bfa;
   --brand-rgb: 139, 92, 246;
   --blue: #3b82f6;
+
+  /* Variables temáticas para el PDF (alias de marca dentro de .paper) */
+  --primary:       #8b5cf6;
+  --primary-light: #a78bfa;
+  --primary-rgb:   139, 92, 246;
 
   --bg: #0f0f1a;
   --bg-2: #16162e;
@@ -16,6 +40,8 @@
   --line-2: rgba(255, 255, 255, 0.05);
 
   --paper: #ffffff;
+  --paper-border: #e5e7eb;   /* bordes sutiles dentro del comprobante */
+  --paper-muted:  #6b7280;   /* texto secundario */
   --shadow: 0 1px 3px rgba(0,0,0,.3), 0 1px 2px rgba(0,0,0,.2);
 
   /* firma de marca: gradiente azul → violeta → violeta claro */
@@ -186,7 +212,7 @@ label {
   color: var(--muted);
   font-weight: 500;
 }
-input[type=text], input[type=date], input[type=file], select {
+input[type=text], input[type=tel], input[type=date], input[type=file], textarea, select {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 9px 11px;
@@ -195,8 +221,9 @@ input[type=text], input[type=date], input[type=file], select {
   color: var(--ink);
   transition: border-color .15s, box-shadow .15s, background .15s;
 }
-input[type=text]::placeholder { color: var(--muted-2); }
-input[type=text]:focus, select:focus {
+textarea { resize: vertical; font-family: inherit; }
+input[type=text]::placeholder, input[type=tel]::placeholder, textarea::placeholder { color: var(--muted-2); }
+input[type=text]:focus, input[type=tel]:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--brand);
   background: rgba(255, 255, 255, 0.06);
@@ -362,13 +389,48 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   flex-shrink: 0;
   margin: 0 auto;
 }
+/* .paper/#paper ya no se muestran — quedan fuera de pantalla como única fuente de layout
+   para `buildPdf()` (ver main.js/pdf.js). `position:fixed` + offset negativo en vez de
+   `display:none`/`hidden`: el renderer necesita medir un elemento realmente en layout. */
+.render-source {
+  position: fixed;
+  top: 0;
+  left: -99999px;
+}
 
-/* ---------- Paper (A4) ---------- */
-/* IMPORTANTE: este bloque define el contenido del PDF. No modificar sin revisar el render. */
+/* Contenedor de `pdf.preview()` (Shadow DOM + canvas, ver pdf.js) — única vista visible del
+   preview-wrap; el propio componente trae su toolbar de paginación/zoom. */
+.pdf-real-frame {
+  /* flex: 1; */
+  min-height: 0;
+  display: flex;
+  /* flex-direction: column; */
+  justify-content: center;
+}
+#pdfPreview {
+  flex: 1;
+  min-height: 600px;
+  border-radius: 10px;
+  overflow: hidden;
+  max-width: 1000px;
+}
+#pdfPreviewHint {
+  display: none;
+}
+.pdf-real-hint {
+  text-align: center;
+  margin: 40px 0 0;
+}
+
+/* ---------- Paper (A4) — documento continuo; html2realpdf pagina solo ---------- */
+/* IMPORTANTE: este bloque define el contenido del PDF. No modificar sin revisar el render.
+   No usar altura fija ni overflow:hidden aquí — @imggion/html2realpdf pagina el contenido
+   real leyendo `break-inside`/`.pdf-atomic` (ver más abajo), no una caja de 297mm simulada.
+   Ver docs/ARCHITECTURE.md § "Multi-página" para el porqué. */
 .paper {
-  --brand: var(--brand, #7a64a9);
-  --paper-accent: var(--brand);
-  --paper-accent-rgb: var(--brand-rgb);
+  --primary:       var(--brand, #7a64a9);
+  --primary-light: var(--brand-2, #a78bfa);
+  --primary-rgb:   var(--brand-rgb, 139, 92, 246);
   width: 210mm;
   min-height: 297mm;
   background: var(--paper);
@@ -376,13 +438,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   box-shadow: 0 4px 24px rgba(0,0,0,.08);
   padding: 14mm 14mm 16mm;
   font-size: 11px;
-  font-family: "Poppins", system-ui, -apple-system, sans-serif;
+  font-family: "Inter Variable", "Inter", system-ui, -apple-system, sans-serif;
   position: relative;
-  /* ponytail: --zoom se setea sólo en mobile desde fitPaperToFrame() para escalar al ancho.
-     En desktop vale 1 (default). El PDF se genera con --zoom:1 para tamaño A4 real. */
-  transform: scale(var(--zoom, 1));
-  transform-origin: top center;
-  transition: transform .15s ease;
 }
 
 .paper h1, .paper h2 { margin: 0; }
@@ -391,30 +448,47 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: .04em;
-  color: var(--paper-accent);
+  color: var(--primary);
   border-bottom: 1px solid var(--line);
   padding-bottom: 3px;
 }
 .paper table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 .paper th, .paper td {
   text-align: left;
-  padding: 10px 12px;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 11px;
+  padding: 5px 10px;
+  border-bottom: 1px solid #f2effa;
+  font-size: 9.5px;
   vertical-align: top;
 }
 .paper th {
-  background: var(--paper-accent);
-  color: #fff;
+  background: rgba(var(--primary-rgb), .08);
+  color: var(--primary);
   font-weight: 700;
   text-transform: uppercase;
-  font-size: 10px;
+  font-size: 8.5px;
   letter-spacing: .04em;
+  padding: 6px 10px;
+  border-bottom: 2px solid rgba(var(--primary-rgb), .25);
 }
 .paper td.num, .paper th.num {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
+/* Zebra striping — mejora el escaneo visual en tablas largas */
+.paper .items-table tbody tr:nth-child(even) td { background: #fbfaff; }
+.paper .items-table td.desc,
+.paper .items-table td:nth-child(3) { color: #372f47; }
+
+/* ---------- Paginación nativa (html2realpdf) ---------- */
+/* .pdf-atomic: bloque que no debe cortarse a la mitad entre hojas. Si no entra completo en
+   el espacio restante de la página actual, se empuja entero a la siguiente — comportamiento
+   nativo del renderer, no simulado. Las filas de la tabla de items SÍ pueden fragmentar entre
+   páginas (es lo esperado con muchos items), pero cada <tr> individual queda intacta. */
+.pdf-atomic { break-inside: avoid; page-break-inside: avoid; }
+.paper .items-table tr { break-inside: avoid; page-break-inside: avoid; }
+/* ponytail: el <thead> se repite automáticamente en cada hoja física cuando la tabla
+   fragmenta — comportamiento nativo de html2realpdf, no hace falta JS para lograrlo. */
+.paper .items-table thead { break-inside: avoid; page-break-inside: avoid; }
 
 /* Header */
 .paper .header {
@@ -422,7 +496,14 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   gap: 20px;
   align-items: flex-start;
   padding-bottom: 14px;
-  border-bottom: 1.5px solid var(--paper-accent);
+  border-bottom: 1.5px solid var(--primary);
+}
+.paper .header-brand {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
 }
 .paper .header .logo {
   width: 80px;
@@ -454,13 +535,13 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   line-height: 1.5;
 }
 .paper .header .doc {
-  border: 2px solid var(--paper-accent);
-  border-radius: 8px;
-  padding: 10px 16px;
+  border: 1px solid rgba(var(--primary-rgb), .3);
+  border-radius: 12px;
+  padding: 14px 22px;
   text-align: center;
   min-width: 220px;
-  color: var(--paper-accent);
-  background: #fff;
+  color: var(--primary);
+  background: rgba(var(--primary-rgb), .05);
 }
 .paper .header .doc .ruc {
   font-size: 10.5px;
@@ -479,26 +560,41 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   font-size: 22px;
   text-align: center;
   margin-top: 4px;
-  color: var(--paper-accent);
+  color: var(--primary);
 }
 
 /* Party block (Cliente / Fecha) — estilo SUNAT: label : value apilados */
 .paper .party-block {
-  margin-top: 14px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  font-size: 11px;
+  font-size: 11.5px;
   color: #111827;
 }
+/* .party-grid: variante de 2 columnas para el bloque principal de 6 filas (Fecha
+   Vencimiento/Emisión/Señor(es) a la izquierda, RUC/Moneda/Observación a la derecha).
+   El split 3/3 se arma EN JS (`partyLeft`/`partyRight`, ver ui.js) en vez de con CSS
+   grid auto-flow: el renderer del PDF no ubica bien los ítems que caen en la 2ª columna
+   implícita de un grid con auto-flow:column (ver docs/ARCHITECTURE.md §7.3) — con
+   flexbox + columnas ya armadas en el HTML no hay ambigüedad de placement. El bloque
+   chico de NC/ND (2 filas) sigue usando `.party-block` a secas (una sola columna), por
+   eso es una clase aparte y no un cambio directo a `.party-block`. */
+.paper .party-block.party-grid { display: flex; flex-direction: row; gap: 28px; }
+.paper .party-grid .party-col { flex: 1; min-width: 0; }
 .paper .party-row {
   display: grid;
   grid-template-columns: 42mm 4mm 1fr;
   gap: 0;
+  padding: 5px 0;
+  border-bottom: 1px solid #f2effa;
 }
-.paper .party-k { font-weight: 600; }
-.paper .party-sep { color: #6b7280; }
-.paper .party-v { font-weight: 700; }
+.paper .party-grid .party-row { grid-template-columns: 40mm 3mm 1fr; }
+.paper .party-grid .party-k { white-space: nowrap; }
+.paper .party-row:last-child { border-bottom: 0; }
+.paper .party-grid .party-col .party-row:last-child { border-bottom: 0; }
+.paper .party-k { font-weight: 500; color: #6b6478; }
+.paper .party-sep { color: #6b6478; }
+.paper .party-v { font-weight: 600; color: #1a1f2c; }
 
 /* Footnotes */
 .paper .footnotes {
@@ -532,67 +628,368 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   color: #111827;
 }
 .paper .grand-box {
-  background: var(--paper-accent);
-  color: #fff;
-  border-radius: 6px;
-  padding: 8px 16px;
-  margin-top: 4px;
+  border-top: 3px double var(--primary);
+  padding: 8px 6px 0;
+  margin-top: 6px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  font-weight: 700;
+  align-items: baseline;
+  gap: 10px;
   width: 75mm;
 }
+/* ponytail: min-width (en vez de width fijo) hacía que este flex row, dentro de un
+   contenedor con `align-items: flex-end` (ver `.totals`), se estirara al ancho completo
+   del `.totals-wrap` en vez de mantenerse angosto — el renderer WASM de html2realpdf no
+   resuelve bien el shrink-to-fit de un flex item con align-self != stretch (mismo tipo de
+   bug de flex ya documentado en ARCHITECTURE.md §7.3). `width` fijo evita depender de eso;
+   el `nowrap` de abajo es lo que realmente arregla el corte de "S/ 3,540.00" a la mitad. */
 .paper .grand-box .lbl {
-  font-size: 10px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .04em;
+  color: #1a1f2c;
+  white-space: nowrap;
 }
-.paper .grand-box .amt { font-size: 15px; }
+/* "S/ 3,540.00" no debe partirse en el espacio entre símbolo de moneda y monto — sin
+   nowrap el flex row de ancho fijo (75mm) lo corta ahí en importes largos. */
+.paper .grand-box .amt { font-size: 19px; font-weight: 800; color: var(--primary); white-space: nowrap; }
 
 /* "Son:" strip */
 .paper .letras {
   margin-top: 16px;
   padding: 10px 14px;
-  background: rgba(var(--paper-accent-rgb), 0.1);
-  border-left: 3px solid var(--paper-accent);
+  background: rgba(var(--primary-rgb), 0.1);
+  border-left: 3px solid var(--primary);
   border-radius: 0 6px 6px 0;
   font-size: 11px;
   color: #374151;
 }
 .paper .letras b {
-  color: var(--paper-accent);
+  color: var(--primary);
   font-style: normal;
   letter-spacing: .03em;
 }
 
-/* Footer (pinned bottom) */
-.paper .footer-note {
-  position: absolute;
-  left: 14mm;
-  right: 14mm;
-  bottom: 10mm;
-  padding: 10px 0;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
-  color: #6b7280;
-  font-size: 9.5px;
-  text-align: center;
+/* Footer (al fondo, en flujo) — el QR de verificación SUNAT va junto al texto legal */
+.paper .footer-wrap {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid #f2effa;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+.paper .qr-wrap { flex-shrink: 0; text-align: center; }
+/* ponytail: 2cm es el ALTO máximo que exige SUNAT para el QR (RS 309-2018) —
+   se deja justo en el límite, nunca por encima. */
+.paper .qr-wrap svg { display: block; width: 20mm; height: 20mm; border-radius: 4px; }
+.paper .qr-cap {
+  margin-top: 3px;
+  font-size: 7px;
+  color: #b5aec2;
   letter-spacing: .02em;
 }
-
-/* ---------- Templates ---------- */
-.template-modern { border-top: 6mm solid var(--brand); }
-.template-modern .header { border-bottom: 1px solid var(--line); }
-.template-minimal {
-  --paper-accent: #000;
-  --paper-accent-rgb: 0, 0, 0;
+.paper .footer-note {
+  flex: 1;
+  color: #6b7280;
+  font-size: 9.5px;
+  letter-spacing: .02em;
 }
-.template-minimal .header { border-bottom: 1px solid #000; padding-bottom: 6px; }
-.template-minimal .header .doc { border-color: #000; color: #000; }
-.template-minimal .header .doc .num { color: #000; }
-.template-minimal th { background: #000; }
-.template-minimal .totals .grand-box { background: #000; }
+/* Payment / contact block (Yape, bancos, redes) */
+.paper .payment-block {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #ece8f6;
+  border-radius: 10px;
+  background: #fdfcff;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  font-size: 10.5px;
+  color: #374151;
+  line-height: 1.45;
+}
+/* break-inside:avoid a nivel de ITEM (no del bloque de pago completo): así, si el
+   bloque no entra completo en lo que queda de hoja, se corta entre íconos/QRs — nunca
+   a la mitad de uno — en vez de empujar el bloque entero a la siguiente hoja (que con
+   varios métodos de pago + 3 QRs puede medir más que el espacio restante y dejar la
+   hoja actual con mucho blanco). Ver docs/ARCHITECTURE.md §7.2. */
+/* align-items:flex-start (no center): con texto de una sola línea no cambia nada, pero
+   evita que el ícono quede "flotando" a mitad de altura cuando el valor ocupa varias
+   líneas (p.ej. cuentas bancarias con 2+ líneas). */
+.paper .pay-item { display: flex; align-items: flex-start; gap: 8px; break-inside: avoid; page-break-inside: avoid; }
+.paper .pay-item .pay-icon { margin-top: 1px; }
+.paper .pay-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(var(--primary-rgb), .1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.paper .pay-icon svg { width: 12px; height: 12px; stroke: var(--primary); }
+/* Fila que fluye y salta de línea sola (flex-wrap) — ni una columna fija ni CSS
+   `columns`/grid-auto-flow (ambos probados y descartados, ver docs/ARCHITECTURE.md
+   §7.3: el primero no lo soporta el renderer del PDF, el segundo ubica mal los ítems
+   de la 2ª columna implícita). Con pocos métodos de pago se ve como una sola fila; con
+   los 6 completos, salta a 2-3 líneas sola — se adapta a cuánta info cargó el usuario
+   en vez de forzar siempre 2 columnas. */
+.paper .payment-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+}
+.paper .payment-info .pay-item-full { flex-basis: 100%; }
+.paper .payment-info b {
+  color: var(--primary);
+  font-weight: 600;
+}
+.paper .payment-banks { white-space: normal; }
+
+/* Billetera: nombre (Yape/Plin/...) + número, lado a lado en una sola fila */
+.wallet-slot { display: flex; gap: 8px; }
+.wallet-slot input:first-child { flex: 0 0 92px; min-width: 0; }
+.wallet-slot input:last-child { flex: 1; min-width: 0; }
+
+/* Upload button (reemplaza <input type="file"> nativo) — dashed vacío, solid accent cuando tiene archivo */
+.upload-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font: 500 13px "Inter Variable", "Inter", sans-serif;
+  background: rgba(var(--brand-rgb), 0.06);
+  color: var(--ink-2);
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s;
+  transform: none;
+  box-shadow: none;
+  opacity: 1;
+  min-width: 0;
+}
+.upload-btn:hover {
+  background: rgba(var(--brand-rgb), 0.16);
+  border-color: rgba(var(--brand-rgb), 0.5);
+  color: #fff;
+  opacity: 1;
+  transform: none;
+  box-shadow: none;
+}
+.upload-btn:active { transform: none; }
+.upload-btn svg { flex-shrink: 0; opacity: 0.85; }
+.upload-btn .upload-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.upload-btn.has-file {
+  color: var(--brand-2);
+  border-style: solid;
+  border-color: rgba(var(--brand-rgb), 0.4);
+  background: rgba(var(--brand-rgb), 0.12);
+}
+.upload-btn.has-file:hover {
+  background: rgba(var(--brand-rgb), 0.2);
+  border-color: rgba(var(--brand-rgb), 0.6);
+}
+.upload-btn.has-file svg { color: var(--brand); opacity: 1; }
+
+/* ---------- Plantillas ----------
+   3 diseños reales y seleccionables (no cosméticos): Ledger Refinado es el look base
+   definido arriba en las reglas `.paper ...` (sin necesidad de scope propio). Grid Moderno
+   y Denso Operativo generan su propio markup en ui.js (`renderGrid`/`renderDenso`, clases
+   `gm-*`/`do-*`) y se estilizan por completo aquí, incluyendo overrides de `.items-table`
+   (que sí comparten markup entre las 3 — ahí vive la paginación nativa, ver ui.js). */
+
+/* === Grid Moderno: header con logo en chip, tarjeta de datos en grid de 3 columnas,
+   tabla con línea gruesa (sin tinte), pagos como "chips" con icono. === */
+.template-grid .header.gm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #ececef;
+  margin: 0;
+}
+.template-grid .gm-brand { display: flex; gap: 14px; align-items: center; }
+.template-grid .gm-logo {
+  width: 44px; height: 44px; border-radius: 10px;
+  background: var(--primary);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  overflow: hidden;
+}
+.template-grid .gm-logo .mini-logo-fallback { color: #fff; font-weight: 800; font-size: 18px; }
+/* Logo real subido por el usuario: sin chip de color ni recorte forzado — imagen neutra,
+   igual criterio que Ledger Refinado (ver `.paper .header .logo`), para no alterar los
+   colores/transparencia del logo. */
+.template-grid .gm-logo-img { width: 44px; height: 44px; object-fit: contain; flex-shrink: 0; }
+.template-grid .gm-brand-tag { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--primary); }
+.template-grid .gm-brand-name { font-weight: 800; font-size: 15px; letter-spacing: -.01em; color: #17181c; margin-top: 2px; overflow-wrap: anywhere; }
+.template-grid .gm-brand-addr { margin-top: 3px; font-size: 10px; color: #8b8c96; }
+.template-grid .gm-meta { text-align: right; flex-shrink: 0; padding-left: 16px; }
+.template-grid .gm-meta-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .1em; color: #a2a3ad; }
+.template-grid .gm-meta-num { margin-top: 6px; font-size: 24px; font-weight: 800; letter-spacing: -.02em; color: #17181c; }
+.template-grid .gm-meta-ruc { margin-top: 4px; font-size: 10px; color: #8b8c96; }
+
+.template-grid .gm-card {
+  margin-top: 18px; background: #f8f7fb; border-radius: 14px; padding: 16px 20px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 16px;
+}
+.template-grid .gm-card-label { font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #9c93b0; }
+.template-grid .gm-card-val { margin-top: 4px; font-size: 11.5px; font-weight: 600; color: #17181c; overflow-wrap: anywhere; }
+
+.template-grid .items-table th {
+  text-align: left; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+  color: #6b6c76; background: transparent; border-bottom: 2px solid #17181c;
+}
+.template-grid .items-table th.num { text-align: right; }
+.template-grid .items-table td { padding: 5px 10px; font-size: 9.5px; border-bottom: 1px solid #f1f1f4; }
+.template-grid .items-table tbody tr:nth-child(even) td { background: #fbfbfd; }
+.template-grid .items-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.template-grid .items-table td:nth-child(3) { color: #35363e; font-weight: 500; }
+.template-grid .items-table td:nth-child(1),
+.template-grid .items-table td:nth-child(2) { color: #8b8c96; }
+.template-grid .footnotes { color: #b3b4bd; }
+
+.template-grid .gm-summary { display: flex; justify-content: flex-end; margin-top: 6px; }
+.template-grid .gm-summary-box { width: 230px; }
+.template-grid .gm-sum-table { width: 100%; }
+.template-grid .gm-sum-table td { padding: 2px 0; font-size: 10.5px; color: #6b6c76; border: 0; }
+.template-grid .gm-sum-table td.num { text-align: right; font-weight: 600; color: #17181c; font-variant-numeric: tabular-nums; }
+.template-grid .gm-total { margin-top: 10px; padding-top: 12px; border-top: 1px solid #ececef; text-align: right; }
+.template-grid .gm-total-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: #a2a3ad; }
+.template-grid .gm-total-amt { margin-top: 4px; font-size: 26px; font-weight: 800; color: var(--primary); letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+
+.template-grid .gm-letras { margin-top: 20px; font-size: 11px; color: #6b6c76; }
+.template-grid .gm-letras b { color: #17181c; }
+
+.template-grid .gm-chips { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+.template-grid .gm-chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #ececef; border-radius: 999px; padding: 7px 14px 7px 10px; font-size: 10.5px; color: #35363e; break-inside: avoid; page-break-inside: avoid; }
+.template-grid .gm-chip svg { width: 14px; height: 14px; stroke: var(--primary); }
+.template-grid .gm-chip b { font-weight: 600; }
+.template-grid .gm-banks { margin-top: 8px; font-size: 10px; color: #6b6c76; }
+.template-grid .gm-banks b { color: #17181c; }
+
+.template-grid .gm-footer-wrap { margin-top: 22px; display: flex; gap: 16px; align-items: center; padding-top: 14px; border-top: 1px solid #ececef; }
+.template-grid .gm-footer { flex: 1; font-size: 9px; color: #b3b4bd; line-height: 1.6; }
+
+/* === Denso Operativo: todo comprimido — header en una línea, franja de datos inline,
+   tabla compacta con header tintado, totales y letras en dos columnas al pie. === */
+.template-denso.paper { font-size: 10px; }
+/* ponytail: align-items:flex-start (no center) — con un logo real ancho tipo wordmark +
+   nombre largo, `.do-doc` (tipo + número) a veces envuelve a 2 líneas mientras `.do-brand`
+   sigue en 1 (el alto de 32px de esta última la marca el LOGO, no el texto). Centrando ambos
+   bloques por su alto total, el que tiene 2 líneas queda con su primera línea empezando más
+   arriba que el nombre — se lee desalineado aunque matemáticamente esté centrado. Alineando
+   arriba, la primera línea de ambos lados arranca al mismo nivel sin importar cuántas líneas
+   termine ocupando el tipo de documento. */
+.template-denso .header.do-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding-bottom: 10px; border-bottom: 1.5px solid var(--primary); margin: 0;
+  flex-wrap: wrap; gap: 8px;
+}
+.template-denso .do-brand { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.template-denso .do-logo {
+  width: 32px; height: 32px; border-radius: 8px; background: var(--primary);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; overflow: hidden;
+}
+.template-denso .do-logo .mini-logo-fallback { color: #fff; font-weight: 800; font-size: 15px; }
+/* Logo real: sin chip de color, mismo criterio que Ledger Refinado y Grid Moderno. */
+.template-denso .do-logo-img { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+/* ponytail: break-word (no anywhere) — "anywhere" corta en cualquier carácter para parejar
+   líneas, lo que dejaba un "." suelto en su propia línea al final de razones sociales tipo
+   "... S.A.C." break-word solo corta dentro de una palabra cuando ni siquiera ella sola
+   entra en el ancho disponible; en cualquier otro caso respeta los espacios normales. */
+.template-denso .do-brand-name { font-weight: 700; font-size: 12.5px; color: #1c1a22; overflow-wrap: break-word; min-width: 0; }
+.template-denso .do-brand-ruc { font-size: 9.5px; color: #837c92; margin-left: 4px; white-space: nowrap; }
+/* ponytail: margin-left:auto asegura que quede pegado a la derecha SIEMPRE — tanto si comparte
+   fila con .do-brand como si un nombre largo hace que `flex-wrap` lo mande a su propia fila
+   (sin esto, al envolver quedaba pegado a la izquierda, debajo del nombre, en vez de mantenerse
+   como badge a la derecha). */
+.template-denso .do-doc { text-align: right; font-size: 11.5px; color: #1c1a22; flex-shrink: 0; margin-left: auto; }
+.template-denso .do-doc b { color: var(--primary); font-weight: 800; }
+
+.template-denso .do-strip {
+  margin-top: 8px; background: rgba(var(--primary-rgb), .06); border-radius: 8px; padding: 7px 14px;
+  display: flex; gap: 18px; flex-wrap: wrap; font-size: 9.5px; color: #4a4356;
+}
+.template-denso .do-strip b { color: #1c1a22; }
+
+.template-denso .items-table { margin-top: 12px !important; }
+.template-denso .items-table th {
+  text-align: left; font-size: 8.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  color: var(--primary); background: rgba(var(--primary-rgb), .06); padding: 6px 10px;
+  border-bottom: 1.5px solid rgba(var(--primary-rgb), .25);
+}
+.template-denso .items-table th.num { text-align: right; }
+.template-denso .items-table td { padding: 5px 10px; font-size: 9.5px; border-bottom: 1px solid #f2effa; }
+.template-denso .items-table tbody tr:nth-child(even) td { background: #faf9fd; }
+.template-denso .items-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.template-denso .items-table td:nth-child(3) { color: #33303c; }
+.template-denso .footnotes { font-size: 7.5px; color: #a79fb3; margin-top: 4px; }
+
+.template-denso .do-bottom { margin-top: 10px; display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
+.template-denso .do-letras-pay { flex: 1; min-width: 0; }
+.template-denso .do-letras { font-size: 10px; color: #4a4356; }
+.template-denso .do-letras b { color: var(--primary); }
+.template-denso .do-pay { margin-top: 7px; font-size: 9px; color: #6b6478; display: flex; gap: 14px; flex-wrap: wrap; }
+.template-denso .do-pay b { color: #1c1a22; }
+
+.template-denso .do-totals { width: 200px; flex-shrink: 0; }
+.template-denso .do-sum-table { width: 100%; }
+.template-denso .do-sum-table td { padding: 1.5px 0; font-size: 9.5px; color: #6b6478; border: 0; }
+.template-denso .do-sum-table td.num { text-align: right; font-weight: 600; color: #1c1a22; font-variant-numeric: tabular-nums; }
+.template-denso .do-grand { display: flex; justify-content: space-between; margin-top: 4px; padding-top: 5px; border-top: 1.5px solid var(--primary); font-size: 12px; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums; }
+
+.template-denso .do-footer-wrap { margin-top: 12px; padding-top: 8px; border-top: 1px solid #f2effa; display: flex; gap: 10px; align-items: center; }
+.template-denso .do-footer { flex: 1; font-size: 7.5px; color: #a79fb3; line-height: 1.5; }
+
+/* ---------- Print media (Puppeteer / Chromium / html2realpdf) ---------- */
+@media print {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    overflow: visible !important;
+    height: auto !important;
+  }
+  /* El margen real de cada hoja ya lo da `@page` (arriba) — acá se apaga el padding/ancho/
+     sombra que `.paper` usa SOLO para verse como una hoja A4 en el preview de pantalla, para
+     no duplicar ese margen ni desbordar el content-box real. `layoutContext: 'page'` (ver
+     pdf.js) reajusta el ancho de `.paper` contra ese content-box — por eso basta `width:100%`
+     acá en vez de recalcular el ancho en mm a mano.
+
+     ponytail: hubo un sticky-footer aquí (`min-height` + `display:flex; flex-direction:column`
+     en `.paper` + `margin-top:auto` en el footer) para pegar el pie de página al fondo de la
+     hoja en comprobantes cortos de una sola página. Se sacó: convertir `.paper` — el elemento
+     que html2realpdf fragmenta en N hojas físicas — en flex container rompe su propio motor de
+     paginación, porque flexbox y CSS fragmentation no coexisten bien. Efecto observado: el
+     `<thead>` repetido de `.items-table` (ver más abajo) se pintaba en la hoja 2 en el mismo
+     offset absoluto que en la hoja 1, en vez de arrancar en el margen superior real de esa
+     hoja. El propio `SKILL.md` de `@imggion/html2realpdf` lo advierte explícitamente: "Do not
+     simulate a page with fixed heights", "Do not use `margin-top: auto` ... as a pagination
+     mechanism". */
+  .paper {
+    box-shadow: none;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  /* oculta UI del app si por error cae dentro del print */
+  .topbar, .panel, .tab-bar, .mobile-cta, .preview-wrap {
+    display: none !important;
+  }
+}
 
 /* ---------- Responsive: tabs en móvil ---------- */
 .tab-bar { display: none; }
@@ -620,13 +1017,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
   .panel-foot { display: none; }
 
   .preview-wrap { overflow: hidden; padding: 12px; }
-  /* ponytail: frame con aspect-ratio A4 para que el paper escalado ocupe el alto correcto.
-     overflow:auto permite scrollear recibos largos dentro del frame sin perder el aspect-ratio. */
-  .paper-frame {
-    width: 100%;
-    aspect-ratio: 210 / 297;
-    overflow: auto;
-  }
+  .pdf-real-frame, #pdfPreview { height: 70vh; min-height: 320px; }
 
   /* ponytail: solo se ve el panel del tab activo */
   .layout[data-active-tab="personalize"] [data-tab-panel="preview"] { display: none; }

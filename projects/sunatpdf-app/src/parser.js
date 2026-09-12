@@ -39,10 +39,10 @@ const docTipoFromId = (idNode) => {
 /**
  * Extrae los datos relevantes de un nodo `cac:Party` UBL.
  * @param {object|null} party
- * @returns {{doc: string, docTipo: string, nombre: string, direccion: string}}
+ * @returns {{doc: string, docTipo: string, docTipoCode: string, nombre: string, direccion: string}}
  */
 function pickParty(party) {
-  if (!party) return { doc: '', docTipo: 'RUC', nombre: '', direccion: '' };
+  if (!party) return { doc: '', docTipo: 'RUC', docTipoCode: '6', nombre: '', direccion: '' };
   const ident = party.PartyIdentification?.ID ?? party.PartyLegalEntity?.CompanyID;
   const legal = party.PartyLegalEntity;
   const person = party.Person;
@@ -57,7 +57,25 @@ function pickParty(party) {
     t(addr?.CityName),
     t(addr?.CountrySubentity),
   ].filter(Boolean).join(' - ');
-  return { doc: cleanDoc(t(ident)), docTipo: docTipoFromId(ident), nombre: name, direccion };
+  // ponytail: docTipoCode es el schemeID crudo del catálogo 06 (no la etiqueta) —
+  // lo necesita el código QR SUNAT (campo "tipo de documento del adquirente").
+  return { doc: cleanDoc(t(ident)), docTipo: docTipoFromId(ident), docTipoCode: t(ident?.['@_schemeID']) || '6', nombre: name, direccion };
+}
+
+/**
+ * Extrae el `ds:DigestValue` del bloque de firma digital (`ext:UBLExtensions`).
+ * Es el "valor resumen" que exige el código QR de SUNAT — ya viene calculado y
+ * firmado por el sistema de facturación original, acá solo se lee.
+ * @param {object} root - Nodo raíz del UBL (Invoice/CreditNote/DebitNote).
+ * @returns {string}
+ */
+function pickDigest(root) {
+  const extensions = arr(root.UBLExtensions?.UBLExtension);
+  for (const ext of extensions) {
+    const digest = ext.ExtensionContent?.Signature?.SignedInfo?.Reference?.DigestValue;
+    if (digest) return t(digest);
+  }
+  return '';
 }
 
 /**
@@ -73,11 +91,12 @@ function pickParty(party) {
  *   serieNumero: string,
  *   fecha: string,
  *   moneda: string,
- *   emisor: {doc: string, docTipo: string, nombre: string, direccion: string},
- *   cliente: {doc: string, docTipo: string, nombre: string, direccion: string},
+ *   emisor: {doc: string, docTipo: string, docTipoCode: string, nombre: string, direccion: string},
+ *   cliente: {doc: string, docTipo: string, docTipoCode: string, nombre: string, direccion: string},
  *   items: Array<{nro, cantidad, unidad, descripcion, precio, subtotal, descuento, igvItem}>,
  *   totals: {gravada, exonerada, inafecta, isc, igv, otrosCargos, otrosTributos, redondeo},
  *   total: number,
+ *   hash: string,
  *   refSerie?: string,
  *   motivo?: string,
  * }}
@@ -160,8 +179,14 @@ export function parseUblXml(xmlText) {
       }
     });
   };
-  arr(root.TaxTotal).forEach((tt) => accumulateSubtotals(tt.TaxSubtotal));
-  lineNodes.forEach((ln) => accumulateSubtotals(ln.TaxTotal?.TaxSubtotal));
+  // ponytail: en UBL real, root.TaxTotal AGREGA el de las líneas. Sumar ambos duplica.
+  // Preferimos líneas (tienen breakdown por item); caemos al root solo si no hay líneas con totales.
+  const linesWithTax = lineNodes.filter((ln) => ln.TaxTotal?.TaxSubtotal);
+  if (linesWithTax.length > 0) {
+    linesWithTax.forEach((ln) => accumulateSubtotals(ln.TaxTotal.TaxSubtotal));
+  } else {
+    arr(root.TaxTotal).forEach((tt) => accumulateSubtotals(tt.TaxSubtotal));
+  }
 
   let otrosCargos = 0;
   arr(root.AllowanceCharge).forEach((ac) => {
@@ -185,6 +210,7 @@ export function parseUblXml(xmlText) {
     emisor, cliente, items,
     totals: { ...totals, otrosCargos, redondeo },
     total,
+    hash: pickDigest(root),
     refSerie: t(refDoc?.ID),
     motivo: t(discrepancy?.Description),
   };

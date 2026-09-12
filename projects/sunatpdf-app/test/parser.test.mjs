@@ -3,7 +3,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { parseUblXml } from '../src/parser.js';
-import { numeroALetras, fmtFecha, unidadLabel, docLabel } from '../src/format.js';
+import { numeroALetras, fmtFecha, unidadLabel, docLabel, buildQrPayload, qrSvg } from '../src/format.js';
+import { makeLongInvoice } from './fixtures/long-invoice.mjs';
 
 // Fixture mínima: boleta con 2 items, gravada=535, igv=0 (exonerada via scheme 1000 + reason 20).
 // Definida como string para que el test sea 100% reproducible sin archivos externos.
@@ -81,7 +82,12 @@ test('emisor: nombre, RUC, dirección', () => {
   assert.equal(data.emisor.nombre, 'EMPRESA TEST S.A.C.');
   assert.equal(data.emisor.doc, '20603396201');
   assert.equal(data.emisor.docTipo, 'RUC');
+  assert.equal(data.emisor.docTipoCode, '6');
   assert.equal(data.emisor.direccion, 'LIMA');
+});
+
+test('hash: sin bloque de firma, queda vacío (no revienta)', () => {
+  assert.equal(data.hash, '');
 });
 
 test('cliente: nombre y RUC', () => {
@@ -150,4 +156,51 @@ test('numeroALetras: casos representativos', () => {
 
 test('numeroALetras: USD', () => {
   assert.match(numeroALetras(100, 'USD'), /DÓLARES AMERICANOS/);
+});
+
+// ---------- long-invoice fixture (boleta larga, fuerza paginación) ----------
+
+test('boleta larga: 60 items gravados (IGV 18%) parsea y totales cuadran', () => {
+  const xml = makeLongInvoice({ items: 60, totalPerItem: 50 });
+  const data = parseUblXml(xml);
+  assert.equal(data.items.length, 60);
+  assert.equal(data.totals.gravada, 3000);
+  assert.equal(data.totals.igv, 540);
+  assert.equal(data.total, 3540);
+  assert.equal(data.tipoCode, '01');
+  assert.equal(data.serieNumero, 'F001-999');
+});
+
+test('hash: se extrae el ds:DigestValue del bloque de firma', () => {
+  const xml = makeLongInvoice({ items: 1, totalPerItem: 50 });
+  const data = parseUblXml(xml);
+  assert.equal(data.hash, 'PLACEHOLDER_DIGEST');
+});
+
+// ---------- código QR (format.js) ----------
+
+test('buildQrPayload: 10 campos separados por "|" + "|" final, formato SUNAT', () => {
+  const xml = makeLongInvoice({ items: 1, totalPerItem: 100, serie: 'F001', nro: '4521' });
+  const data = parseUblXml(xml);
+  const payload = buildQrPayload(data);
+  const fields = payload.split('|');
+  assert.equal(fields.length, 11); // 10 campos + '' final por el "|" de cierre
+  assert.equal(fields[0], '20603396201');   // RUC emisor
+  assert.equal(fields[1], '01');            // tipoCode (catálogo 01)
+  assert.equal(fields[2], 'F001');          // serie
+  assert.equal(fields[3], '00004521');      // correlativo (padded a 8 dígitos)
+  assert.equal(fields[4], '18.00');         // IGV
+  assert.equal(fields[5], '118.00');        // total
+  assert.equal(fields[6], '2026-09-06');    // fecha emisión
+  assert.equal(fields[7], '6');             // tipo doc receptor (catálogo 06, RUC=6)
+  assert.equal(fields[8], '20123456789');   // núm. doc receptor
+  assert.equal(fields[9], 'PLACEHOLDER_DIGEST'); // hash
+  assert.equal(fields[10], '');             // "|" final
+});
+
+test('qrSvg: genera un <svg> vectorial válido (no imagen raster)', () => {
+  const svg = qrSvg('20123456789|01|F001|00000001|18.00|118.00|2026-01-01|6|20987654321|abc|');
+  assert.match(svg, /^<svg /);
+  assert.match(svg, /viewBox="0 0 100 100"/);
+  assert.match(svg, /<rect /);
 });

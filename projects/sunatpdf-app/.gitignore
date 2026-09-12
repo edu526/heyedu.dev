@@ -6,6 +6,9 @@ dist
 .idea
 .vscode
 
+# screenshots temporales (script de Playwright en .shots/)
+.shots/*.png
+
 # local XMLs de prueba
 /boletas/*.XML
 /boletas/*.xml
