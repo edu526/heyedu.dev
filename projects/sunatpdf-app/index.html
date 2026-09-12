@@ -2,7 +2,7 @@
 <html lang="es-PE">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
   <meta name="theme-color" content="#0f0f1a" />
 
   <title>XML SUNAT a PDF — Convierte boletas y facturas a PDF vectorial</title>
@@ -29,6 +29,8 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="XML SUNAT a PDF — Boletas y facturas a PDF vectorial" />
   <meta name="twitter:description" content="Convierte tus XML de comprobantes electrónicos SUNAT a PDF personalizado. 100% local." />
+  <meta name="twitter:image" content="https://heyedu.dev/sunatpdf/og-image.png" />
+  <meta name="twitter:image:alt" content="XML SUNAT → PDF — convierte boletas y facturas SUNAT a PDF vectorial" />
 
   <!-- Schema.org -->
   <script type="application/ld+json">
@@ -58,6 +60,73 @@
       "url": "https://heyedu.dev",
       "sameAs": ["https://github.com/edu526"]
     }
+  }
+  </script>
+
+  <!-- FAQPage: mismas preguntas que la sección "Preguntas frecuentes" del body (ver más abajo) —
+       mantenerlas en sync si se edita una u otra. -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Qué comprobantes puedo convertir?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Boletas de venta (03), facturas (01), notas de crédito (07) y notas de débito (08) emitidos por SUNAT en formato UBL 2.1."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Mis archivos están seguros?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "100% local — el XML nunca sale de tu navegador. No hay servidor, no se sube nada. Funciona offline después de la primera carga."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Necesito registrarme o pagar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Sin cuenta, sin login, sin límites, sin costo."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Puedo personalizar el PDF?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Sí: agrega tu logo, nombre comercial, color principal y elige entre 3 plantillas (Ledger Refinado, Grid Moderno, Denso Operativo)."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿El PDF es de buena calidad?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Vectorial, con texto seleccionable y buscable, tipografía Inter embebida y tamaño exacto A4 (210×297 mm). Ideal para imprimir o archivar."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Qué navegador necesito?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Uno moderno: Chrome, Edge, Firefox o Safari de los últimos 2 años. No funciona en Internet Explorer."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "¿Cómo encuentro mi CCI o número de cuenta?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Abre tu banca móvil o web, entra a \"Mis cuentas\" o \"Cuentas y ahorros\". Verás el número de cuenta (BCP: 14 dígitos) y el CCI (20 dígitos, empieza con 0 para soles o 1 para dólares). Cópialos y pégalos en \"Cuentas bancarias\", uno por línea."
+        }
+      }
+    ]
   }
   </script>
 

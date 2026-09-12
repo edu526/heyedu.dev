@@ -105,7 +105,9 @@ html, body {
   -webkit-text-fill-color: transparent;
   animation: gradientFlow 5s ease infinite;
 }
-.heyedu-brand .dev { color: #64748b; font-weight: 300; }
+/* #64748b (slate-500) daba 3.99:1 contra el fondo #0f0f1a — Lighthouse lo marca (necesita
+   4.5:1 en texto normal). #7c8ba3 da ~5.5:1, sigue leyéndose "apagado" junto a `.hey`. */
+.heyedu-brand .dev { color: #7c8ba3; font-weight: 300; }
 
 .app-title {
   display: flex;
