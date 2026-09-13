@@ -28,6 +28,7 @@ export interface TranslationSet {
     title: string;
     githubLink: string;
     docsLink: string;
+    webLink: string;
     items: {
       devoCli: { name: string; description: string };
       codeLauncher: { name: string; description: string };
@@ -58,7 +59,7 @@ export const translations: Record<Lang, TranslationSet> = {
     hero: {
       available: 'Disponible para trabajar',
       titles: ['Software Engineer', 'DevOps Engineer', 'Full Stack Developer', 'Tech Lead'],
-      subtitle: '10 años construyendo el puente entre frontend, backend e infraestructura cloud.',
+      subtitle: '10 años picando código en frontend, backend e infraestructura — un poco de todo.',
       ctaProjects: 'Ver Proyectos',
       ctaGithub: 'GitHub',
       ctaLinkedin: 'LinkedIn',
@@ -66,8 +67,8 @@ export const translations: Record<Lang, TranslationSet> = {
     about: {
       sectionLabel: '01 — Sobre mí',
       title: 'Sobre mí',
-      bio1: 'Con más de 10 años en la industria del software, he recorrido el camino desde el desarrollo frontend hasta la arquitectura cloud. Mi especialidad es construir sistemas robustos y automatizados que escalan.',
-      bio2: 'Trabajo con AWS, pipelines CI/CD, Python y TypeScript — disfruto resolverlo todo, desde la infraestructura hasta la interfaz.',
+      bio1: 'Llevo más de 10 años en esto. Empecé en frontend, después caí en backend, y en los últimos años se me fue la mano con AWS y automatización. Ahora hago un poco de todo.',
+      bio2: 'Trabajo con AWS, CI/CD, Python y TypeScript. Me gusta meterme en lo que sea que haga falta, desde un pipeline roto hasta un botón que no alinea.',
       bio3: 'Fuera del código, soy músico — la misma disciplina y creatividad que aplico a la tecnología.',
       skillsTitle: 'Stack & Herramientas',
     },
@@ -81,7 +82,7 @@ export const translations: Record<Lang, TranslationSet> = {
         devoCli: {
           name: 'devo-cli',
           description:
-            'CLI de productividad para desarrolladores: commits automáticos con IA, code review, gestión de AWS SSO, DynamoDB y más.',
+            'CLI de productividad para desarrolladores — ahora también como app de escritorio (Tauri + Svelte), independiente y con un set más reducido de flujos, algunos aún más automatizados. Commits automáticos con IA, code review, gestión de AWS SSO, DynamoDB y más.',
         },
         codeLauncher: {
           name: 'Vori',
@@ -118,7 +119,7 @@ export const translations: Record<Lang, TranslationSet> = {
     hero: {
       available: 'Available for work',
       titles: ['Software Engineer', 'DevOps Engineer', 'Full Stack Developer', 'Tech Lead'],
-      subtitle: '10 years bridging frontend, backend and cloud infrastructure.',
+      subtitle: '10 years writing code across frontend, backend, and infrastructure — a bit of everything.',
       ctaProjects: 'See Projects',
       ctaGithub: 'GitHub',
       ctaLinkedin: 'LinkedIn',
@@ -126,8 +127,8 @@ export const translations: Record<Lang, TranslationSet> = {
     about: {
       sectionLabel: '01 — Who I am',
       title: 'About me',
-      bio1: 'With over 10 years in the software industry, I have journeyed from frontend development to cloud architecture. My specialty is building robust, automated systems that scale.',
-      bio2: 'I work with AWS, CI/CD pipelines, Python and TypeScript — I enjoy tackling it all, from infrastructure down to the interface.',
+      bio1: "I've been doing this for over 10 years. Started in frontend, drifted into backend, and somewhere along the way got really into AWS and automation. These days I do a bit of everything.",
+      bio2: "I work with AWS, CI/CD, Python and TypeScript. I like jumping into whatever needs fixing, from a broken pipeline to a button that won't align.",
       bio3: 'Outside of code, I am a musician — the same discipline and creativity I apply to technology.',
       skillsTitle: 'Stack & Tools',
     },
@@ -141,7 +142,7 @@ export const translations: Record<Lang, TranslationSet> = {
         devoCli: {
           name: 'devo-cli',
           description:
-            'Developer productivity CLI: AI-powered commits, code review, AWS SSO management, DynamoDB and more.',
+            'Developer productivity CLI — now also as a desktop app (Tauri + Svelte), independent and with a smaller set of flows, some even more automated. AI-powered commits, code review, AWS SSO management, DynamoDB and more.',
         },
         codeLauncher: {
           name: 'Vori',

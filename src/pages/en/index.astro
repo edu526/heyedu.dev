@@ -1,0 +1,22 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+import Hero from '../../components/Hero.astro';
+import About from '../../components/About.astro';
+import Projects from '../../components/Projects.astro';
+import Contact from '../../components/Contact.astro';
+import { translations } from '../../i18n/translations';
+
+const lang = 'en';
+const t = translations[lang];
+---
+
+<Layout lang={lang} title={t.meta.title} description={t.meta.description}>
+  <Navbar lang={lang} />
+  <main>
+    <Hero lang={lang} />
+    <About lang={lang} />
+    <Projects lang={lang} />
+  </main>
+  <Contact lang={lang} />
+</Layout>
